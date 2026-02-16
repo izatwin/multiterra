@@ -1,0 +1,5 @@
+vm:
+  name: web
+  cpu: 2
+  memory: 4GB
+  public: true

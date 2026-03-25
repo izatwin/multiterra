@@ -1,6 +1,6 @@
-= Common Interface for Providers
+# Common Interface for Providers
 
-== VM
+## VM
 
 | Field       | Type             | Description                                    |
 | ----------- | ---------------- | ---------------------------------------------- |
@@ -9,7 +9,7 @@
 | network     | string           | The virtual network this VM belongs to         |
 | firewall    | firewall_rules   | The firewall rules for this VM                 |
 
-== Network
+## Network
 
 | Field       | Type             | Description                                    |
 | ----------- | ---------------- | ---------------------------------------------- |

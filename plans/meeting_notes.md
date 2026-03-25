@@ -1,8 +1,8 @@
-= Meeting Notes
+# Meeting Notes
 
-== March 25th
+## March 25th
 
-=== Topics:
+### Topics:
 
 + Is terraform a good starting point? Should we based this on [SST Serverless](https://sst.dev/) or [Pulumi](https://www.pulumi.com/) instead?
 + What is our MVP?

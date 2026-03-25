@@ -16,9 +16,14 @@ Topics:
 
   Goal: One common definition for all clouds. Any one definition can deploy to any supported cloud.
 
-+ Possible Project Renaming?
++ Possible Project Renaming? maybe to Simpleform
 
 + What is the bare minimum needed for each cloud provider for the MVP?
+### MVP
++ Extremely simple program that can create a VM in AWS and GCP
++ be able to choose between a couple different 'tiers' like low mid high which we would map to different ram and cpu configs
++ networking options
++ 
 
 
 

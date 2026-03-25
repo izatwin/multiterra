@@ -2,12 +2,31 @@
 
 ## March 25th
 
-### Topics:
+Topics:
 
 + Is terraform a good starting point? Should we based this on [SST Serverless](https://sst.dev/) or [Pulumi](https://www.pulumi.com/) instead?
+
+  Decision: Switch to using Pulumi.
+  Reason: Seems to allow for additional logic for configuration with useful abstractions.
+
 + What is our MVP?
+
+  Making a new Pulumi component with opinionated decisions on resource creation. Supports 2-3 providers with a commonly defined interface.
+  Resources can be switched by only changing one variable denoting the provider.
+
+  Goal: One common definition for all clouds. Any one definition can deploy to any supported cloud.
+
++ Possible Project Renaming?
+
 + What is the bare minimum needed for each cloud provider for the MVP?
+
+
+
 + How to divide work?
+
 + Next Meeting Time?
+
+
+
 
 

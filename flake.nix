@@ -17,23 +17,18 @@
     ];
     forAllSystems = nixpkgs.lib.genAttrs systems;
   in {
-    packages = forAllSystems (
-      system: let
-        pkgs = import nixpkgs {inherit system;};
-      in {
-        default = pkgs.opentofu;
-        opentofu = pkgs.opentofu;
-      }
-    );
-
     devShells = forAllSystems (
       system: let
         pkgs = import nixpkgs {inherit system;};
       in {
         default = pkgs.mkShell {
           packages = with pkgs; [
-            opentofu
-            terraform-ls
+            uv
+            pulumi
+            pulumiPackages.pulumi-python
+            pulumiPackages.pulumi-random
+            awscli2
+            google-cloud-sdk
           ];
         };
       }

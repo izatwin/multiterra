@@ -38,7 +38,8 @@
 
 Agenda: Create simple main.py and VM resource class for AWS EC2 VMs.
 
-
+- Jack has created a starting point for the code layout closest to want we currently defined
+- Rushali created a working deployment of a bucket using Pulumi
 
 
 

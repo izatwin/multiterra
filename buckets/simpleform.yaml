@@ -1,0 +1,7 @@
+cloud: aws
+name: buck1
+resource: bucket
+settings:
+  public_access: true
+  region: us-east
+  versioning: true

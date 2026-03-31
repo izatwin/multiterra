@@ -3,3 +3,4 @@ venv/
 .venv/
 .direnv
 .envrc
+Pulumi.dev.yaml

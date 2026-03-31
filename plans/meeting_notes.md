@@ -61,7 +61,18 @@ Next Meeting: [When2Meet](https://www.when2meet.com/?35831393-N55Qv)
 
 ## March 30th
 
-+
++ VM Instance needs to take Subnet as arg, not VPC.
+  - Needs Generialized Subnet Class.
++ Generalized classes should implement:
+  - setProvider
+  - clone
++ Networking Security Groups (Ingress Groups)
+
+Next time:
+- Mockups of main.py
+-
+
+
 
 
 

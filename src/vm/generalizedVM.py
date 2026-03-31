@@ -1,3 +1,7 @@
+# generalizedVM.py
+
+
+
 # ---------------
 #     Imports
 # ---------------
@@ -6,7 +10,7 @@
 
 import pulumi
 
-from utilsAwsVM import obtainConfig_AWS, createVM_AWS
+from vm.utilsAwsVM import config_aws, createVM_AWS
 
 
 
@@ -17,12 +21,11 @@ from utilsAwsVM import obtainConfig_AWS, createVM_AWS
 
 
 class GeneralizedVM(pulumi.ComponentResource):
-    def __init__(self, name: str, provider: str, tier: str):
-        if provider == "aws":
-            config = obtainConfig_AWS(self, tier)
+    def __init__(self, name: str, provider: str, tier: str, subnet, ami=None, opts=None):
+        super().__init__('custom:resources:GeneralizedVM', name, opts=opts)
 
-            super().__init__('custom:resources:GeneralizedVM', name, {}, config["opts"])
-            self.instance = createVM_AWS(self, name, config)
+        if provider == "aws":
+            self.instance = createVM_AWS(self, name, config_aws[tier], subnet, ami)
 
             self.register_outputs({"instance_id": self.instance.id})
         else:

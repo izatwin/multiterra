@@ -29,9 +29,9 @@ class GeneralizedVM(pulumi.ComponentResource):
         self.name = name
         self.image = image
 
-    def add_providers(providers: str[]):
-        self.subnet.add_providers(providers) # Add providers to all dependencies first
-        self.image.add_providers(providers)
+    def set_providers(self, providers: str[]):
+        self.subnet.set_providers(providers) # Add providers to all dependencies first
+        self.image.set_providers(providers)
         for p in providers:
             if p = "aws":
                 if provider == "aws":

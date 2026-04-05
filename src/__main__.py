@@ -37,16 +37,20 @@ def main():
         cidr_block="10.0.1.0/24",
     )
 
+    image = GeneralizedImage()
+
     low_instance = GeneralizedVM(
         "lowInstance",
         tier="low",
         subnet=subnet,
+        image=image,
     )
 
     high_instance = GeneralizedVM(
         "highInstance",
         tier="high",
         subnet=subnet,
+        image=image,
     )
 
 

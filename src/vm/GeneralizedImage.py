@@ -1,4 +1,5 @@
 import pulumi
+import pulumi_aws as aws
 
 
 class GeneralizedImage(pulumi.ComponentResource):
@@ -6,15 +7,23 @@ class GeneralizedImage(pulumi.ComponentResource):
         super().__init__('custom:resources:GeneralizedImage', name, opts=opts)
         self.name = name
         self.image_blob = image_blob
-        # TODO
-    def add_providers(providers: str[]):
+        self.instance = dict()
+
+    def set_providers(self, providers: List[str]):
         for p in providers:
-            if p = "aws":
-                if provider == "aws":
-                    if "aws" not in self.instance:
-                        # self.instance["aws"] = TODO
-                else:
-                    raise ValueError("Provider not implemented")
+            if p in self.instance:
+                continue
+            if p ==  "aws":
+                self.instance["aws"] = aws.ec2.get_ami(
+                    most_recent=True,
+                    owners=["137112412989"],
+                    filters=[{
+                        "name": "name",
+                        "values": ["amzn2-ami-hvm-*-x86_64-gp2"]
+                    }]
+                )
+            else:
+                raise ValueError("Provider not implemented")
 
 
 

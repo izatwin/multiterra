@@ -29,17 +29,17 @@ class GeneralizedVM(pulumi.ComponentResource):
         self.name = name
         self.image = image
 
-    def set_providers(self, providers: str[]):
+    def set_providers(self, providers: List[str]):
         self.subnet.set_providers(providers) # Add providers to all dependencies first
         self.image.set_providers(providers)
         for p in providers:
-            if p = "aws":
-                if provider == "aws":
-                    if "aws" not in self.instance:
-                        self.instance["aws"] = createVM_AWS(self, self.name, config_aws[self.tier], self.subnet, self.image.get_instance(aws))
-                        self.register_outputs({"aws_instance_id": self.instance.id}) # try to keep common output format
-                else:
-                    raise ValueError("Provider not implemented")
+            if p in self.instance:
+                continue
+            if p == "aws":
+                self.instance["aws"] = createVM_AWS(self, self.name, config_aws[self.tier], self.subnet, self.image.instance["aws"])
+                self.register_outputs({"aws_instance_id": self.instance["aws"].id}) # try to keep common output format
+            else:
+                raise ValueError("Provider not implemented")
 
 
 

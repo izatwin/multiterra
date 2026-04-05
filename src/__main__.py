@@ -12,32 +12,27 @@ import pulumi
 import pulumi_aws as aws
 
 from vm.GeneralizedVM import GeneralizedVM
-
-
+from vm.GeneralizedImage import GeneralizedImage
+from subnet import GeneralizedSubnet
+from vpc import GeneralizedVPC
 
 # ------------
 #     Main
 # ------------
 
-
-
-def main1():
-    return
-
-
 def main():
-    vpc = GeneralizedVpc(
+    vpc = GeneralizedVPC(
         "vpc",
-        cidr_block="10.0.0.0/16",
+        "10.0.0.0/16",
     )
 
     subnet = GeneralizedSubnet(
         "subnet",
-        vpc=vpc,
-        cidr_block="10.0.1.0/24",
+        vpc,
+        "10.0.1.0/24",
     )
 
-    image = GeneralizedImage()
+    image = GeneralizedImage("tbd")
 
     low_instance = GeneralizedVM(
         "lowInstance",
@@ -54,7 +49,7 @@ def main():
     )
 
 
-    low_instance.set_providers(["aws", "gcp"]) # declares this vm and all dependencies on AWS and GCP
+    low_instance.set_providers(["aws"]) # declares this vm and all dependencies on AWS
     high_instance.set_providers(["aws"]) # declares this vm and all dependencies on AWS only. Reuses existing subnet and vpc.
 
 

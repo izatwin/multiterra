@@ -49,8 +49,11 @@ def main():
     )
 
 
-    low_instance.set_providers(["aws"]) # declares this vm and all dependencies on AWS
-    high_instance.set_providers(["aws"]) # declares this vm and all dependencies on AWS only. Reuses existing subnet and vpc.
+    low_instance.set_providers({"aws"}) # declares this vm and all dependencies on AWS
+    high_instance.set_providers({"aws"}) # declares this vm and all dependencies on AWS only. Reuses existing subnet and vpc.
+
+    low_instance.set_regions({"region"})
+    high_instance.set_regions({"region"})
 
 
 if __name__ == "__main__":

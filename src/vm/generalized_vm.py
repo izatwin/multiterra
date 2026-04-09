@@ -1,18 +1,8 @@
-# GeneralizedVM.py
-
-
-
-# ---------------
-#     Imports
-# ---------------
-
-
-
 import pulumi
 
-from GeneralizedCR import GeneralizedCR
+from generalized_cr import GeneralizedCR
 
-from vm.utilsAwsVM import config_aws, createVM_AWS
+from .utilsAwsVM import config_aws, createVM_AWS
 
 
 

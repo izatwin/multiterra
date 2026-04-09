@@ -11,10 +11,8 @@
 import pulumi
 import pulumi_aws as aws
 
-from vm.GeneralizedVM import GeneralizedVM
-from vm.GeneralizedImage import GeneralizedImage
-from subnet import GeneralizedSubnet
-from vpc import GeneralizedVPC
+from vm import *
+from network import *
 
 # ------------
 #     Main

@@ -1,6 +1,7 @@
 import pulumi
 import pulumi_aws as aws
-from GeneralizedCR import GeneralizedCR
+
+from generalized_cr import GeneralizedCR
 
 class GeneralizedSubnet(GeneralizedCR):
     def __init__(self, name: str, vpc, cidr_block, opts=None):

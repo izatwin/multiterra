@@ -1,6 +1,6 @@
 import pulumi
 import pulumi_aws as aws
-from GeneralizedCR import GeneralizedCR
+from generalized_cr import GeneralizedCR
 
 
 class GeneralizedImage(GeneralizedCR):

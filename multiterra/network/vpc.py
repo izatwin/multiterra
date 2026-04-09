@@ -1,7 +1,7 @@
 import pulumi
 import pulumi_aws as aws
 
-from generalized_cr import GeneralizedCR
+from ..generalized_cr import GeneralizedCR
 
 class GeneralizedVPC(GeneralizedCR):
     def __init__(self, name: str, cidr_block, opts=None):

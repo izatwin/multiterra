@@ -1,22 +1,9 @@
-# __main__.py
-
-
-
-# ---------------
-#     Imports
-# ---------------
-
-
-
-import pulumi
-import pulumi_aws as aws
-
-from vm import *
-from network import *
-
-# ------------
-#     Main
-# ------------
+from multiterra import (
+    GeneralizedImage,
+    GeneralizedSubnet,
+    GeneralizedVM,
+    GeneralizedVPC,
+)
 
 def main():
     vpc = GeneralizedVPC(
@@ -47,8 +34,8 @@ def main():
     )
 
 
-    low_instance.set_providers({"aws"}) # declares this vm and all dependencies on AWS
-    high_instance.set_providers({"aws"}) # declares this vm and all dependencies on AWS only. Reuses existing subnet and vpc.
+    low_instance.set_providers({"aws"})
+    high_instance.set_providers({"aws"})
 
     low_instance.set_regions({"region"})
     high_instance.set_regions({"region"})

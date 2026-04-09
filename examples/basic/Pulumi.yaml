@@ -1,0 +1,7 @@
+name: multiterra-basic
+description: Basic example using the multiterra component library
+runtime:
+  name: python
+  options:
+    toolchain: uv
+main: .

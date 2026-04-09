@@ -1,7 +1,11 @@
+from __future__ import annotations
+
+from typing import List, Set
+
 import pulumi
 
 class GeneralizedCR(pulumi.ComponentResource):
-    def __init__(self, identifier: str, name: str, deps: List[GeneralizedCR], opts=None):
+    def __init__(self, identifier: str, name: str, deps: List["GeneralizedCR"], opts=None):
         super().__init__(identifier, name, opts=opts)
         self.identifier = identifier
         self.name = name
@@ -37,7 +41,6 @@ class GeneralizedCR(pulumi.ComponentResource):
                 if instance_id in self.__instance_matrix:
                     continue
                 self.__instance_matrix[instance_id] = create_func(r)
-
 
 
 

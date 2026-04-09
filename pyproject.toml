@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "multiterra"
 version = "0.1.0"
@@ -8,3 +12,6 @@ dependencies = [
     "pulumi>=3.228.0",
     "pulumi-aws>=7.23.0",
 ]
+
+[tool.setuptools]
+packages = ["multiterra", "multiterra.network", "multiterra.vm"]

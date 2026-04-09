@@ -1,6 +1,6 @@
 import pulumi
 
-from generalized_cr import GeneralizedCR
+from ..generalized_cr import GeneralizedCR
 
 from .utilsAwsVM import config_aws, createVM_AWS
 
@@ -24,7 +24,6 @@ class GeneralizedVM(GeneralizedCR):
         instance = createVM_AWS(self, self.name, config_aws[self.tier], self.subnet, self.image.get_instance("aws", region))
         self.register_outputs({"aws_instance_id": instance.id}) # try to keep common output format
         return instance
-
 
 
 

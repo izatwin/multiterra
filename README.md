@@ -1,28 +1,40 @@
 # multiterra
 
-An opinionated wrapper for pulumi to generate configs for various providers using a single spec file.
+Reusable Pulumi components for generalized network and VM provisioning.
 
-Providers to start out supporting: AWS, GCP
+## Library usage
 
-### Inputs
+```python
+from multiterra import (
+    GeneralizedImage,
+    GeneralizedSubnet,
+    GeneralizedVM,
+    GeneralizedVPC,
+)
+```
 
-- `provider`: "aws" or "gcp"
-- `vms`: map of VM definitions keyed by name
-  - `cpu` (number)
-  - `memory_gb` (number)
-  - `public_ip` (bool)
-- `aws_ami` (string, default "ami-12345678")
-- `aws_subnet_id` (string, default null)
-- `gcp_image` (string, default "debian-cloud/debian-11")
-- `gcp_zone` (string, default "us-central1-a")
-- `gcp_network` (string, default "default")
+Primary components:
+- `GeneralizedVPC`
+- `GeneralizedSubnet`
+- `GeneralizedImage`
+- `GeneralizedVM`
 
-### Outputs
+## Run the example
 
-- `instance_ids`: map of instance IDs
-- `public_ips`: map of public IPs
-- `private_ips`: map of private IPs
+The Pulumi program that previously lived in `src/__main__.py` is now at `examples/basic/__main__.py`.
 
-### Example
+```bash
+cd examples/basic
+pulumi preview
+```
 
-See `examples/basic` for a working example. Update provider credentials/IDs as needed.
+From repo root you can also run:
+
+```bash
+pulumi preview
+```
+
+## Notes
+
+- Current component provider implementation is AWS-only.
+- `buckets/` remains a separate prototype app and is not part of the component library package.

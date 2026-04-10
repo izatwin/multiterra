@@ -10,8 +10,8 @@ class GeneralizedImage(GeneralizedCR):
         self.name = name
         self.image_blob = image_blob
 
-    def _create_aws(self, region):
-        aws.ec2.get_ami(
+    def _create_aws(self, deployment, region):
+        return aws.ec2.get_ami(
             most_recent=True,
             owners=["137112412989"],
             filters=[{
@@ -19,6 +19,5 @@ class GeneralizedImage(GeneralizedCR):
                 "values": ["amzn2-ami-hvm-*-x86_64-gp2"]
             }]
         )
-
 
 

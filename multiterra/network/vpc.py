@@ -9,7 +9,7 @@ class GeneralizedVPC(GeneralizedCR):
         self.name = name
         self.cidr_block = cidr_block
 
-    def _create_aws(self, region: str):
+    def _create_aws(self, deployment, region: str):
         instance = aws.ec2.Vpc(
             self.name,
             cidr_block=self.cidr_block,

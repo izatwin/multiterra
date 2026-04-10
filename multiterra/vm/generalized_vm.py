@@ -20,11 +20,17 @@ class GeneralizedVM(GeneralizedCR):
         self.name = name
         self.image = image
 
-    def _create_aws(self, region):
-        instance = createVM_AWS(self, self.name, config_aws[self.tier], self.subnet, self.image.get_instance("aws", region))
+    def _create_aws(self, deployment, region):
+        image = None if self.image is None else self.image.get_instance(deployment, "aws", region)
+        instance = createVM_AWS(
+            self,
+            self.name,
+            config_aws[self.tier],
+            self.subnet.get_instance(deployment, "aws", region),
+            image,
+        )
         self.register_outputs({"aws_instance_id": instance.id}) # try to keep common output format
         return instance
-
 
 
 

@@ -1,48 +1,64 @@
 from __future__ import annotations
 
-from typing import List, Set
+from typing import Any, Dict, List, Set
 
 import pulumi
+
+
+class _ComponentDeploymentState:
+    def __init__(self):
+        self.__instance_matrix: Dict[str, Any] = {}
+
+    def get_instance(self, provider: str, region: str):
+        return self.__instance_matrix[f"{provider}-{region}"]
+
+    def has_instance(self, provider: str, region: str) -> bool:
+        return f"{provider}-{region}" in self.__instance_matrix
+
+    def set_instance(self, provider: str, region: str, instance: Any):
+        self.__instance_matrix[f"{provider}-{region}"] = instance
+
+
+class DeploymentState:
+    def __init__(self):
+        self.__component_states: Dict[GeneralizedCR, _ComponentDeploymentState] = {}
+
+    def __get_component_state(self, component: "GeneralizedCR") -> _ComponentDeploymentState:
+        if component not in self.__component_states:
+            self.__component_states[component] = _ComponentDeploymentState()
+        return self.__component_states[component]
+
+    def get_instance(self, component: "GeneralizedCR", provider: str, region: str):
+        return self.__get_component_state(component).get_instance(provider, region)
+
+    def has_instance(self, component: "GeneralizedCR", provider: str, region: str) -> bool:
+        return self.__get_component_state(component).has_instance(provider, region)
+
+    def set_instance(self, component: "GeneralizedCR", provider: str, region: str, instance: Any):
+        self.__get_component_state(component).set_instance(provider, region, instance)
+
 
 class GeneralizedCR(pulumi.ComponentResource):
     def __init__(self, identifier: str, name: str, deps: List["GeneralizedCR"], opts=None):
         super().__init__(identifier, name, opts=opts)
         self.identifier = identifier
         self.name = name
-        self.__deps = deps
-        self.__instance_matrix = dict()
-        self.__providers = set()
-        self.__regions = set()
+        self.__deps = [dep for dep in deps if dep is not None]
 
-    def get_instance(self, provider: str, region: str):
-        return self.__instance_matrix[f"{provider}-{region}"]
+    def get_instance(self, deployment: DeploymentState, provider: str, region: str):
+        return deployment.get_instance(self, provider, region)
 
-    def set_regions(self, regions: Set[str]):
-        self.__regions.update(regions)
-        self.__populate_matrix()
-
-    def set_providers(self, providers: Set[str]):
-        self.__providers.update(providers)
-        self.__populate_matrix()
-
-    def __populate_matrix(self):
+    def deploy(self, deployment: DeploymentState, providers: Set[str], regions: Set[str]):
         # Update deps first
         for dep in self.__deps:
-            dep.set_regions(self.__regions)
-            dep.set_providers(self.__providers)
-        for p in self.__providers:
+            dep.deploy(deployment, providers, regions)
+        for p in providers:
             func_name = f"_create_{p}"
             create_func = getattr(self, func_name, None)
             if create_func is None or not callable(create_func):
                 print(func_name)
                 raise ValueError(f"Provider {p} not implemented on {type(self)}")
-            for r in self.__regions:
-                instance_id = f"{p}-{r}"
-                if instance_id in self.__instance_matrix:
+            for r in regions:
+                if deployment.has_instance(self, p, r):
                     continue
-                self.__instance_matrix[instance_id] = create_func(r)
-
-
-
-
-
+                deployment.set_instance(self, p, r, create_func(deployment, r))

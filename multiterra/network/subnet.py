@@ -10,10 +10,10 @@ class GeneralizedSubnet(GeneralizedCR):
         self.vpc = vpc
         self.cidr_block = cidr_block
 
-    def _create_aws(self, region: str):
+    def _create_aws(self, deployment, region: str):
         instance = aws.ec2.Subnet(
             self.name,
-            vpc_id=self.vpc.get_instance("aws", region).id,
+            vpc_id=self.vpc.get_instance(deployment, "aws", region).id,
             cidr_block=self.cidr_block,
             opts = pulumi.ResourceOptions(parent=self),
         )

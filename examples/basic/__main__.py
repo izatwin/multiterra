@@ -1,5 +1,5 @@
 from multiterra import (
-    DeploymentState,
+    Deployment,
     GeneralizedImage,
     GeneralizedSubnet,
     GeneralizedVM,
@@ -34,12 +34,7 @@ def main():
         image=image,
     )
 
-    deployment = DeploymentState()
-    providers = {"aws"}
-    regions = {"region"}
-
-    low_instance.deploy(deployment, providers, regions)
-    high_instance.deploy(deployment, providers, regions)
+    deployment = Deployment("aws_deployment", [low_instance, high_instance], {"aws"}, {"region"})
 
 
 if __name__ == "__main__":

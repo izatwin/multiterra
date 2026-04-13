@@ -37,6 +37,15 @@ class DeploymentState:
     def set_instance(self, component: "GeneralizedCR", provider: str, region: str, instance: Any):
         self.__get_component_state(component).set_instance(provider, region, instance)
 
+class Deployment(pulumi.ComponentResource):
+    def __init__(self, name: str, roots: List["GeneralizedCR"], providers: Set[str], regions: Set[str], opts=None):
+        super().__init__("custom:resources:Deployment", name, opts=opts)
+        self.name = name
+        self.__roots = [root for root in roots if root is not None]
+        self.__deployment_state = DeploymentState()
+
+        for root in self.__roots:
+            root.deploy(self.__deployment_state, providers, regions)
 
 class GeneralizedCR(pulumi.ComponentResource):
     def __init__(self, identifier: str, name: str, deps: List["GeneralizedCR"], opts=None):

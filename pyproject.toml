@@ -8,3 +8,13 @@ dependencies = [
     "pulumi>=3.228.0",
     "pulumi-aws>=7.23.0",
 ]
+
+[build-system]
+requires = ["uv_build>=0.11.6"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "multiterra"
+module-root = ""
+
+

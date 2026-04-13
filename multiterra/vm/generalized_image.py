@@ -1,6 +1,7 @@
 import pulumi
 import pulumi_aws as aws
-from GeneralizedCR import GeneralizedCR
+
+from ..generalized_cr import GeneralizedCR
 
 
 class GeneralizedImage(GeneralizedCR):
@@ -18,7 +19,6 @@ class GeneralizedImage(GeneralizedCR):
                 "values": ["amzn2-ami-hvm-*-x86_64-gp2"]
             }]
         )
-
 
 
 

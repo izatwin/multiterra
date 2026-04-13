@@ -1,5 +1,5 @@
 name: multiterra
-description: A minimal Python Pulumi program
+description: multiterra component library repository
 runtime:
   name: python
   options:
@@ -8,4 +8,4 @@ config:
   pulumi:tags:
     value:
       pulumi:template: python
-main: src
+main: examples/basic

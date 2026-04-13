@@ -1,4 +1,4 @@
-from .subnet import GeneralizedSubnet
-from .vpc import GeneralizedVPC
+from .subnet import GeneralizedSubnet, GeneralizedSubnetArgs
+from .vpc import GeneralizedVPC, GeneralizedVPCArgs
 
-__all__ = ["GeneralizedSubnet", "GeneralizedVPC"]
+__all__ = ["GeneralizedVPC", "GeneralizedVPCArgs", "GeneralizedSubnet", "GeneralizedSubnetArgs"]

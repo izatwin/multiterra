@@ -1,31 +1,45 @@
+from __future__ import annotations
+
+from typing import NotRequired, Optional, TypedDict, cast
+
 import pulumi
 
-from ..generalized_cr import GeneralizedCR
-
+from ..generalized_cr import DeploymentState, GeneralizedCR
 from .utilsAwsVM import config_aws, createVM_AWS
 
 
-
-# ---------------------------
-#     class GeneralizedVM
-# ---------------------------
-
+class GeneralizedVMArgs(TypedDict):
+    tier: str
+    subnet: GeneralizedCR
+    image: NotRequired[GeneralizedCR]
 
 
 class GeneralizedVM(GeneralizedCR):
-    def __init__(self, name: str, tier: str, subnet, image=None, opts=None):
-        super().__init__('custom:resources:GeneralizedVM', name, [subnet, image], opts=opts)
-        self.subnet = subnet
-        self.tier = tier
-        self.name = name
+    def __init__(
+        self,
+        name: str,
+        args: GeneralizedVMArgs,
+        opts: Optional[pulumi.ResourceOptions] = None,
+    ) -> None:
+        deps = [args["subnet"]]
+        image = args.get("image")
+        if image is not None:
+            deps.append(image)
+
+        super().__init__("multiterra:vm:GeneralizedVM", name, deps, opts=opts)
+        self.subnet = args["subnet"]
+        self.tier = cast(str, args["tier"])
         self.image = image
 
-    def _create_aws(self, region):
-        instance = createVM_AWS(self, self.name, config_aws[self.tier], self.subnet, self.image.get_instance("aws", region))
-        self.register_outputs({"aws_instance_id": instance.id}) # try to keep common output format
-        return instance
-
-
-
-
-
+    def _create_aws(self, deployment: DeploymentState, region: str):
+        provider = deployment.get_provider("aws", region, self)
+        subnet = self.subnet.get_instance(deployment, "aws", region)
+        image = None if self.image is None else self.image.get_instance(deployment, "aws", region)
+        return createVM_AWS(
+            self,
+            self.resource_name_prefix("aws", region),
+            config_aws[self.tier],
+            subnet,
+            provider,
+            image,
+        )

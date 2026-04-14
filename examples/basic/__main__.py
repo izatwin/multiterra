@@ -1,4 +1,5 @@
 from multiterra import (
+    Deployment,
     GeneralizedImage,
     GeneralizedSubnet,
     GeneralizedVM,
@@ -8,37 +9,45 @@ from multiterra import (
 def main():
     vpc = GeneralizedVPC(
         "vpc",
-        "10.0.0.0/16",
+        {
+            "cidr_block": "10.0.0.0/16",
+        },
     )
 
     subnet = GeneralizedSubnet(
         "subnet",
-        vpc,
-        "10.0.1.0/24",
+        {
+            "vpc": vpc,
+            "cidr_block": "10.0.1.0/24",
+        },
     )
 
-    image = GeneralizedImage("tbd")
+    image = GeneralizedImage(
+        "tbd",
+        {
+            "image_blob": "",
+        },
+    )
 
     low_instance = GeneralizedVM(
         "lowInstance",
-        tier="low",
-        subnet=subnet,
-        image=image,
+        {
+            "tier": "low",
+            "subnet": subnet,
+            "image": image,
+        },
     )
 
     high_instance = GeneralizedVM(
         "highInstance",
-        tier="high",
-        subnet=subnet,
-        image=image,
+        {
+            "tier": "high",
+            "subnet": subnet,
+            "image": image,
+        },
     )
 
-
-    low_instance.set_providers({"aws"})
-    high_instance.set_providers({"aws"})
-
-    low_instance.set_regions({"region"})
-    high_instance.set_regions({"region"})
+    deployment = Deployment("aws_deployment", [low_instance, high_instance], {"aws"}, {"us-east-1"})
 
 
 if __name__ == "__main__":

@@ -1,10 +1,12 @@
 from multiterra import (
     Deployment,
+    GeneralizedBucket,
     GeneralizedImage,
     GeneralizedSubnet,
     GeneralizedVM,
     GeneralizedVPC,
 )
+
 
 def main():
     vpc = GeneralizedVPC(
@@ -47,8 +49,26 @@ def main():
         },
     )
 
-    Deployment("aws_deployment", [low_instance, high_instance], "aws", {"us-east-1":None})
-    Deployment("gcp_deployment", [low_instance, high_instance], "gcp", {"us-central1":"us-central1-a"})
+    app_storage = GeneralizedBucket(
+        "app-data",
+        {
+            "public_access": False,
+        },
+    )
+
+    Deployment(
+        "aws_deployment",
+        [low_instance, high_instance, app_storage],
+        "aws",
+        {"us-east-1":None},
+    )
+    
+    Deployment(
+        "gcp_deployment",
+        [low_instance, high_instance, app_storage],
+        "gcp",
+        {"us-central1":"us-central1-a"},
+    )
 
 
 if __name__ == "__main__":

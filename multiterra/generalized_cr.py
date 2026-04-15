@@ -42,7 +42,9 @@ class Deployment(pulumi.ComponentResource):
         for root in self._roots:
             root.deploy(self, provider, regions)
 
-    def _get_component_state(self, component: "GeneralizedCR") -> _ComponentDeploymentState:
+    def _get_component_state(
+        self, component: "GeneralizedCR"
+    ) -> _ComponentDeploymentState:
         if component not in self._component_states:
             self._component_states[component] = _ComponentDeploymentState()
         return self._component_states[component]
@@ -50,10 +52,14 @@ class Deployment(pulumi.ComponentResource):
     def get_instance(self, component: "GeneralizedCR", provider: str, region: str):
         return self._get_component_state(component).get_instance(provider, region)
 
-    def has_instance(self, component: "GeneralizedCR", provider: str, region: str) -> bool:
+    def has_instance(
+        self, component: "GeneralizedCR", provider: str, region: str
+    ) -> bool:
         return self._get_component_state(component).has_instance(provider, region)
 
-    def set_instance(self, component: "GeneralizedCR", provider: str, region: str, instance: Any):
+    def set_instance(
+        self, component: "GeneralizedCR", provider: str, region: str, instance: Any
+    ):
         self._get_component_state(component).set_instance(provider, region, instance)
 
     def get_deployment_provider(self, provider: str, region: str, zone:str) -> pulumi.ProviderResource:
@@ -81,8 +87,16 @@ class Deployment(pulumi.ComponentResource):
             self._providers[cache_key] = gcp_provider
             return gcp_provider
 
-        raise ValueError(f"Provider {provider} not implemented")
+        if provider == "gcp":
+            gcp_provider = gcp.Provider(
+                cache_key,
+                region=region,
+                opts=pulumi.ResourceOptions(parent=self),
+            )
+            self._providers[cache_key] = gcp_provider
+            return gcp_provider
 
+        raise ValueError(f"Unsupported provider: {provider}")
 
 
 class GeneralizedCR(pulumi.ComponentResource):

@@ -47,7 +47,8 @@ def main():
         },
     )
 
-    Deployment("aws_deployment", [low_instance, high_instance], "aws", {"us-east-1"})
+    Deployment("aws_deployment", [low_instance, high_instance], "aws", {"us-east-1":None})
+    Deployment("gcp_deployment", [low_instance, high_instance], "gcp", {"us-central1":"a"})
 
 
 if __name__ == "__main__":

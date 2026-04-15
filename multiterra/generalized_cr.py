@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Sequence, Set
 
 import pulumi
 import pulumi_aws as aws
+import pulumi_gcp as gcp
 
 
 def _target_key(provider: str, region: str) -> str:
@@ -30,7 +31,7 @@ class Deployment(pulumi.ComponentResource):
         name: str,
         roots: List["GeneralizedCR"],
         provider: str,
-        regions: Set[str],
+        regions: Dict[str, str],
         opts: Optional[pulumi.ResourceOptions] = None,
     ):
         super().__init__("multiterra:common:Deployment", name, opts=opts)
@@ -55,8 +56,9 @@ class Deployment(pulumi.ComponentResource):
     def set_instance(self, component: "GeneralizedCR", provider: str, region: str, instance: Any):
         self._get_component_state(component).set_instance(provider, region, instance)
 
-    def get_deployment_provider(self, provider: str, region: str) -> pulumi.ProviderResource:
+    def get_deployment_provider(self, provider: str, region: str, zone:str) -> pulumi.ProviderResource:
         cache_key = _target_key(provider, region)
+        print(f"CACHE KEY: {cache_key}\nREGION:    {region}\n\n\n")
         if cache_key in self._providers:
             return self._providers[cache_key]
 
@@ -68,6 +70,17 @@ class Deployment(pulumi.ComponentResource):
             )
             self._providers[cache_key] = aws_provider
             return aws_provider
+        
+        if provider == "gcp":
+            gcp_provider = gcp.Provider(
+                cache_key,
+                project=f"pulumi-test123",
+                region=region,
+                zone=zone,
+                opts=pulumi.ResourceOptions(parent=self),
+            )
+            self._providers[cache_key] = gcp_provider
+            return gcp_provider
 
         raise ValueError(f"Provider {provider} not implemented")
 
@@ -88,16 +101,16 @@ class GeneralizedCR(pulumi.ComponentResource):
     def get_instance(self, deployment: Deployment, provider: str, region: str):
         return deployment.get_instance(self, provider, region)
 
-    def deploy(self, deployment: Deployment, provider: str, regions: Set[str]):
+    def deploy(self, deployment: Deployment, provider: str, regions: Dict[str, str]):
         for dep in self._deps:
             dep.deploy(deployment, provider, regions)
 
         create_func = getattr(self, f"_create_{provider}", None)
         if create_func is None or not callable(create_func):
             raise ValueError(f"Provider {provider} not implemented on {type(self)}")
-        for region in regions:
+        for region, zone in regions.items():
             if not deployment.has_instance(self, provider, region):
-                deployment.set_instance(self, provider, region, create_func(deployment, region))
+                deployment.set_instance(self, provider, region, create_func(deployment, region, zone))
 
     def resource_name_prefix(self, provider: str, region: str) -> str:
         return f"{provider}-{region}-{type(self).__name__}-{self.name}"

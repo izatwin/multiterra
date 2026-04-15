@@ -16,7 +16,7 @@ config_aws = {
 
 
 def createVM_AWS(
-    self,
+    deployment,
     name: str,
     config: dict,
     subnet,
@@ -43,5 +43,5 @@ def createVM_AWS(
         instance_type=config["instance_type"],
         ami=ami_id,
         subnet_id=subnet.id,
-        opts=pulumi.ResourceOptions(parent=self, provider=provider),
+        opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
     )

@@ -4,7 +4,7 @@ from typing import NotRequired, Optional, TypedDict, cast
 
 import pulumi
 
-from ..generalized_cr import DeploymentState, GeneralizedCR
+from ..generalized_cr import Deployment, GeneralizedCR
 from .utilsAwsVM import config_aws, createVM_AWS
 
 
@@ -31,12 +31,12 @@ class GeneralizedVM(GeneralizedCR):
         self.tier = cast(str, args["tier"])
         self.image = image
 
-    def _create_aws(self, deployment: DeploymentState, region: str):
-        provider = deployment.get_provider("aws", region, self)
+    def _create_aws(self, deployment: Deployment, region: str):
+        provider = deployment.get_deployment_provider("aws", region)
         subnet = self.subnet.get_instance(deployment, "aws", region)
         image = None if self.image is None else self.image.get_instance(deployment, "aws", region)
         return createVM_AWS(
-            self,
+            deployment,
             self.resource_name_prefix("aws", region),
             config_aws[self.tier],
             subnet,

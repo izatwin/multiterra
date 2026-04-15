@@ -33,7 +33,7 @@ class Deployment(pulumi.ComponentResource):
         regions: Set[str],
         opts: Optional[pulumi.ResourceOptions] = None,
     ):
-        super().__init__("custom:resources:Deployment", name, opts=opts)
+        super().__init__("multiterra:common:Deployment", name, opts=opts)
         self._component_states: Dict[GeneralizedCR, _ComponentDeploymentState] = {}
         self._providers: Dict[str, pulumi.ProviderResource] = {}
         self._roots = [root for root in roots if root is not None]

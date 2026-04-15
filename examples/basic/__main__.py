@@ -4,6 +4,7 @@ from multiterra import (
     GeneralizedSubnet,
     GeneralizedVM,
     GeneralizedVPC,
+    GeneralizedFirewall
 )
 
 def main():
@@ -28,6 +29,20 @@ def main():
             "image_blob": "",
         },
     )
+
+    firewall = GeneralizedFirewall(
+    "firewall",
+    {
+        "vpc": vpc,
+        "ingress": [
+            {"port": 22,  "protocol": "tcp", "cidr": "0.0.0.0/0"},
+            {"port": 443, "protocol": "tcp", "cidr": "0.0.0.0/0"},
+        ],
+        "egress": [
+            {"port": 0, "protocol": "-1", "cidr": "0.0.0.0/0"},
+        ],
+    },
+)
 
     low_instance = GeneralizedVM(
         "lowInstance",

@@ -26,7 +26,7 @@ class GeneralizedFirewall(GeneralizedCR):
         self,
         name: str,
         args: GeneralizedFirewallArgs,
-        opts: Optional[pulumi.ResourceOptions] = None,
+        opts: pulumi.ResourceOptions | None = None,
     ) -> None:
         super().__init__(
             "multiterra:network:GeneralizedFirewall",
@@ -54,8 +54,8 @@ class GeneralizedFirewall(GeneralizedCR):
                 security_group_id=instance.id,
                 cidr_ipv4=egress["cidr"] if is_ipv4(egress["cidr"]) else None,
                 cidr_ipv6=egress["cidr"] if not is_ipv4(egress["cidr"]) else None,
-                from_port=int(egress["port"]) if egress["protocol"] != "-1" else None,
-                to_port=int(egress["port"]) if egress["protocol"] != "-1" else None,
+                from_port=egress["port"] if egress["protocol"] != "-1" else None,
+                to_port=egress["port"] if egress["protocol"] != "-1" else None,
                 ip_protocol=egress["protocol"],
                 opts=pulumi.ResourceOptions(parent=self, provider=provider))
 
@@ -65,8 +65,8 @@ class GeneralizedFirewall(GeneralizedCR):
                 security_group_id=instance.id,
                 cidr_ipv4=ingress["cidr"] if is_ipv4(ingress["cidr"]) else None,
                 cidr_ipv6=ingress["cidr"] if not is_ipv4(ingress["cidr"]) else None,
-                from_port=int(ingress["port"]) if ingress["protocol"] != "-1" else None,
-                to_port=int(ingress["port"]) if ingress["protocol"] != "-1" else None,
+                from_port=ingress["port"] if ingress["protocol"] != "-1" else None,
+                to_port=ingress["port"] if ingress["protocol"] != "-1" else None,
                 ip_protocol=ingress["protocol"],
                 opts=pulumi.ResourceOptions(parent=self, provider=provider))
 

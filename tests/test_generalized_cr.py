@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 from unittest.mock import patch
 
-from multiterra.generalized_cr import DeploymentState, GeneralizedCR
+from multiterra.generalized_cr import Deployment, GeneralizedCR
 
 
 class _FakeDependency(GeneralizedCR):
@@ -11,7 +11,7 @@ class _FakeDependency(GeneralizedCR):
         super().__init__("test:FakeDependency", name, [])
         self.created = []
 
-    def _create_aws(self, deployment: DeploymentState, region: str):
+    def _create_aws(self, deployment: Deployment, region: str):
         instance = {"kind": "dependency", "name": self.name, "region": region}
         self.created.append(instance)
         return instance
@@ -23,7 +23,7 @@ class _FakeParent(GeneralizedCR):
         self.dep = dep
         self.created = []
 
-    def _create_aws(self, deployment: DeploymentState, region: str):
+    def _create_aws(self, deployment: Deployment, region: str):
         dep_instance = self.dep.get_instance(deployment, "aws", region)
         instance = {"kind": "parent", "name": self.name, "region": region, "dep": dep_instance}
         self.created.append(instance)
@@ -45,7 +45,7 @@ class GeneralizedCRDeploymentTests(unittest.TestCase):
         shared_dep = _FakeDependency("shared")
         parent_one = _FakeParent("one", shared_dep)
         parent_two = _FakeParent("two", shared_dep)
-        deployment = DeploymentState()
+        deployment = Deployment("test", [], set(), set())
 
         parent_one.deploy(deployment, {"aws"}, {"us-east-1"})
         parent_two.deploy(deployment, {"aws"}, {"us-east-1"})
@@ -57,8 +57,8 @@ class GeneralizedCRDeploymentTests(unittest.TestCase):
         dep = _FakeDependency("shared")
         parent = _FakeParent("one", dep)
 
-        deployment_one = DeploymentState()
-        deployment_two = DeploymentState()
+        deployment_one = Deployment("one", [], set(), set())
+        deployment_two = Deployment("two", [], set(), set())
 
         parent.deploy(deployment_one, {"aws"}, {"us-east-1"})
         parent.deploy(deployment_two, {"aws"}, {"us-east-1"})

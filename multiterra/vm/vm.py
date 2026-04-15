@@ -39,6 +39,7 @@ class GeneralizedVMArgs(TypedDict):
     tier: str
     subnet: GeneralizedCR
     image: NotRequired[GeneralizedCR]
+    firewall: NotRequired[GeneralizedCR]
 
 
 class GeneralizedVM(GeneralizedCR):
@@ -52,11 +53,15 @@ class GeneralizedVM(GeneralizedCR):
         image = args.get("image")
         if image is not None:
             deps.append(image)
+        firewall = args.get("firewall")
+        if firewall is not None:
+            deps.append(firewall)
 
         super().__init__("multiterra:vm:GeneralizedVM", name, deps, opts=opts)
         self.subnet = args["subnet"]
         self.tier = cast(str, args["tier"])
         self.image = image
+        self.firewall = firewall
 
 
     def _create_aws(self, deployment: Deployment, region: str, zone:str):
@@ -64,7 +69,8 @@ class GeneralizedVM(GeneralizedCR):
         config = config_aws[self.tier]
         provider = deployment.get_deployment_provider("aws", region, zone)
         subnet = self.subnet.get_instance(deployment, "aws", region)
-    
+        firewall = None if self.firewall is None else self.firewall.get_instance(deployment, "aws", region)
+
         if self.image is None: 
             image = aws.ec2.get_ami(
                 most_recent=True,
@@ -78,13 +84,14 @@ class GeneralizedVM(GeneralizedCR):
                 opts=pulumi.InvokeOptions(provider=provider),
             )
         else:
-            image = self.image.get_instance(deployment, "aws", region)    
+            image = self.image.get_instance(deployment, "aws", region)
 
         return aws.ec2.Instance(
             f"{name}-instance",
             instance_type=config["instance_type"],
             ami=image.id,
             subnet_id=subnet.id,
+            vpc_security_group_ids = [firewall.id] if firewall is not None else None,
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
 

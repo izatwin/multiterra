@@ -5,6 +5,7 @@ from multiterra import (
     GeneralizedSubnet,
     GeneralizedVM,
     GeneralizedVPC,
+    GeneralizedFirewall
 )
 
 
@@ -31,19 +32,34 @@ def main():
         },
     )
 
+    firewall = GeneralizedFirewall(
+    "firewall",
+    {
+        "vpc": vpc,
+        "ingress": [
+            {"port": 22,  "protocol": "tcp", "cidr": "0.0.0.0/0"},
+            {"port": 443, "protocol": "tcp", "cidr": "0.0.0.0/0"},
+        ],
+        "egress": [
+            {"port": 0, "protocol": "-1", "cidr": "0.0.0.0/0"},
+        ],
+    },
+)
+
     low_instance = GeneralizedVM(
         "lowInstance",
         {
             "tier": "low",
             "subnet": subnet,
             "image": image,
+            "firewall": firewall,
         },
     )
 
-    high_instance = GeneralizedVM(
-        "highInstance",
+    low_instance_two = GeneralizedVM(
+        "lowInstanceTwo",
         {
-            "tier": "high",
+            "tier": "low",
             "subnet": subnet,
             "image": image,
         },
@@ -58,7 +74,7 @@ def main():
 
     Deployment(
         "aws_deployment",
-        [low_instance, high_instance, app_storage],
+        [low_instance, low_instance_two, app_storage],
         "aws",
         {"us-east-1":None},
     )

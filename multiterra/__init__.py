@@ -6,6 +6,8 @@ from .network import (
     GeneralizedSubnetArgs,
     GeneralizedVPC,
     GeneralizedVPCArgs,
+    GeneralizedFirewall,
+    GeneralizedFirewallArgs,
 )
 from .vm import GeneralizedImage, GeneralizedImageArgs, GeneralizedVM, GeneralizedVMArgs
 
@@ -20,6 +22,8 @@ __all__ = [
     "GeneralizedImageArgs",
     "GeneralizedVM",
     "GeneralizedVMArgs",
+    "GeneralizedFirewall",
+    "GeneralizedFirewallArgs",
     "GeneralizedBucket",
     "GeneralizedBucketArgs",
 ]

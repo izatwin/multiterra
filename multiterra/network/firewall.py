@@ -48,27 +48,27 @@ class GeneralizedFirewall(GeneralizedCR):
             opts=pulumi.ResourceOptions(parent=self, provider=provider),
         )
 
-        for egress in (self.egress or []):
+        for i, egress in enumerate(self.egress or []):
             aws.vpc.SecurityGroupEgressRule(
-                f"{self.resource_name_prefix('aws', region)}-egress-{egress["port"]}",
+                f"{self.resource_name_prefix('aws', region)}-egress-{egress["port"]}-{i}",
                 security_group_id=instance.id,
                 cidr_ipv4=egress["cidr"] if is_ipv4(egress["cidr"]) else None,
                 cidr_ipv6=egress["cidr"] if not is_ipv4(egress["cidr"]) else None,
                 from_port=egress["port"] if egress["protocol"] != "-1" else None,
                 to_port=egress["port"] if egress["protocol"] != "-1" else None,
                 ip_protocol=egress["protocol"],
-                opts=pulumi.ResourceOptions(parent=self, provider=provider))
+                opts=pulumi.ResourceOptions(parent=instance, provider=provider))
 
-        for ingress in (self.ingress or []):
+        for i, ingress in enumerate(self.ingress or []):
             aws.vpc.SecurityGroupIngressRule(
-                f"{self.resource_name_prefix('aws', region)}-ingress-{ingress["port"]}",
+                f"{self.resource_name_prefix('aws', region)}-ingress-{ingress["port"]}-{i}",
                 security_group_id=instance.id,
                 cidr_ipv4=ingress["cidr"] if is_ipv4(ingress["cidr"]) else None,
                 cidr_ipv6=ingress["cidr"] if not is_ipv4(ingress["cidr"]) else None,
                 from_port=ingress["port"] if ingress["protocol"] != "-1" else None,
                 to_port=ingress["port"] if ingress["protocol"] != "-1" else None,
                 ip_protocol=ingress["protocol"],
-                opts=pulumi.ResourceOptions(parent=self, provider=provider))
+                opts=pulumi.ResourceOptions(parent=instance, provider=provider))
 
         return instance
 

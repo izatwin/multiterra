@@ -50,20 +50,20 @@ def main():
             "tier": "low",
             "subnet": subnet,
             "image": image,
-            "firewalls": [firewall],
+            "firewall": firewall,
         },
     )
 
-    # high_instance = GeneralizedVM(
-    #     "highInstance",
-    #     {
-    #         "tier": "high",
-    #         "subnet": subnet,
-    #         "image": image,
-    #     },
-    # )
+    low_instance_two = GeneralizedVM(
+        "lowInstanceTwo",
+        {
+            "tier": "low",
+            "subnet": subnet,
+            "image": image,
+        },
+    )
 
-    deployment = Deployment("aws_deployment", [low_instance], {"aws"}, {"us-east-1"})
+    deployment = Deployment("aws_deployment", [low_instance, low_instance_two], {"aws"}, {"us-east-1"})
 
 
 if __name__ == "__main__":

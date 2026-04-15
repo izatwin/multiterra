@@ -4,6 +4,7 @@ from typing import Optional, TypedDict
 
 import pulumi
 import pulumi_aws as aws
+import pulumi_gcp as gcp
 
 from ..generalized_cr import Deployment, GeneralizedCR
 
@@ -29,13 +30,31 @@ class GeneralizedSubnet(GeneralizedCR):
         self.vpc = args["vpc"]
         self.cidr_block = args["cidr_block"]
 
-    def _create_aws(self, deployment: Deployment, region: str) -> aws.ec2.Subnet:
-        provider = deployment.get_deployment_provider("aws", region)
+
+    def _create_aws(self, deployment: Deployment, region: str, zone:str) -> aws.ec2.Subnet:
+        provider = deployment.get_deployment_provider("aws", region, zone)
         vpc = self.vpc.get_instance(deployment, "aws", region)
         instance = aws.ec2.Subnet(
             self.resource_name_prefix("aws", region),
             vpc_id=vpc.id,
             cidr_block=self.cidr_block,
+            availability_zone=zone,
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
+        return instance
+
+
+    def _create_gcp(self, deployment: Deployment, region: str, zone:str) -> gcp.compute.Subnetwork:
+        provider = deployment.get_deployment_provider("gcp", region, zone)
+
+        vpc = self.vpc.get_instance(deployment, "gcp", region)
+
+        instance = gcp.compute.Subnetwork(
+            self.resource_name_prefix("gcp", region),
+            ip_cidr_range=self.cidr_block,
+            region=region,
+            network=vpc.id,
+            opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
+        )
+
         return instance

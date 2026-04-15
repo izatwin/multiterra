@@ -29,7 +29,7 @@ class Deployment(pulumi.ComponentResource):
         self,
         name: str,
         roots: List["GeneralizedCR"],
-        providers: Set[str],
+        provider: str,
         regions: Set[str],
         opts: Optional[pulumi.ResourceOptions] = None,
     ):
@@ -39,7 +39,7 @@ class Deployment(pulumi.ComponentResource):
         self._roots = [root for root in roots if root is not None]
 
         for root in self._roots:
-            root.deploy(self, providers, regions)
+            root.deploy(self, provider, regions)
 
     def _get_component_state(self, component: "GeneralizedCR") -> _ComponentDeploymentState:
         if component not in self._component_states:
@@ -88,17 +88,15 @@ class GeneralizedCR(pulumi.ComponentResource):
     def get_instance(self, deployment: Deployment, provider: str, region: str):
         return deployment.get_instance(self, provider, region)
 
-    def deploy(self, deployment: Deployment, providers: Set[str], regions: Set[str]):
+    def deploy(self, deployment: Deployment, provider: str, regions: Set[str]):
         for dep in self._deps:
-            dep.deploy(deployment, providers, regions)
+            dep.deploy(deployment, provider, regions)
 
-        for provider in providers:
-            create_func = getattr(self, f"_create_{provider}", None)
-            if create_func is None or not callable(create_func):
-                raise ValueError(f"Provider {provider} not implemented on {type(self)}")
-            for region in regions:
-                if deployment.has_instance(self, provider, region):
-                    continue
+        create_func = getattr(self, f"_create_{provider}", None)
+        if create_func is None or not callable(create_func):
+            raise ValueError(f"Provider {provider} not implemented on {type(self)}")
+        for region in regions:
+            if not deployment.has_instance(self, provider, region):
                 deployment.set_instance(self, provider, region, create_func(deployment, region))
 
     def resource_name_prefix(self, provider: str, region: str) -> str:

@@ -21,6 +21,7 @@ def createVM_AWS(
     config: dict,
     subnet,
     provider: pulumi.ProviderResource,
+    firewalls,
     ami=None,
 ):
     if ami is None:
@@ -43,5 +44,6 @@ def createVM_AWS(
         instance_type=config["instance_type"],
         ami=ami_id,
         subnet_id=subnet.id,
+        vpc_security_group_ids=[f.id for f in firewalls] if firewalls is not None else None,
         opts=pulumi.ResourceOptions(parent=self, provider=provider),
     )

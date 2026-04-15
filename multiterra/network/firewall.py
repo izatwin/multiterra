@@ -38,13 +38,14 @@ class GeneralizedFirewall(GeneralizedCR):
         self.ingress = args["ingress"]
         self.egress = args["egress"]
 
-    def _create_aws(self, deployment: DeploymentState, region: str) -> aws.ec2.SecurityGroup:
+    def _create_aws(self, deployment: DeploymentState, region: str, zone:str) -> aws.ec2.SecurityGroup:
         provider = deployment.get_provider("aws", region, self)
         vpc = self.vpc.get_instance(deployment, "aws", region)
         instance = aws.ec2.SecurityGroup(
             self.resource_name_prefix("aws", region),
             name=self.resource_name_prefix("aws", region),
             vpc_id=vpc.id,
+            availability_zone=zone,
             opts=pulumi.ResourceOptions(parent=self, provider=provider),
         )
 

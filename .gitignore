@@ -4,3 +4,4 @@ venv/
 .direnv
 .envrc
 Pulumi.dev.yaml
+examples/basic/Pulumi.main-stack.yaml

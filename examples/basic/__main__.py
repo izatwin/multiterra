@@ -76,7 +76,14 @@ def main():
         "aws_deployment",
         [low_instance, low_instance_two, app_storage],
         "aws",
-        {"us-east-1"},
+        {"us-east-1":None},
+    )
+    
+    Deployment(
+        "gcp_deployment",
+        [low_instance, high_instance, app_storage],
+        "gcp",
+        {"us-central1":"us-central1-a"},
     )
 
 

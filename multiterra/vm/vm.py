@@ -80,12 +80,10 @@ class GeneralizedVM(GeneralizedCR):
         else:
             image = self.image.get_instance(deployment, "aws", region)    
 
-        image_id = image.id if hasattr(image, "id") else image.image_id
-
         return aws.ec2.Instance(
             f"{name}-instance",
             instance_type=config["instance_type"],
-            ami=image_id,
+            ami=image.id,
             subnet_id=subnet.id,
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
@@ -106,8 +104,6 @@ class GeneralizedVM(GeneralizedCR):
         else:
             image = self.image.get_instance(deployment, "gcp", region)
 
-        image_self_link = image.self_link if hasattr(image, "self_link") else image
-
         return gcp.compute.Instance(
             f"{name}-instance",
             machine_type=config["machine_type"],
@@ -115,13 +111,14 @@ class GeneralizedVM(GeneralizedCR):
 
             boot_disk={
                 "initialize_params": {
-                    "image": image_self_link,
+                    "image": image.self_link,
                 }
             },
 
             network_interfaces=[{
                 "subnetwork": subnet.id,
+                "access_configs": [{}],
             }],
 
-            opts=pulumi.ResourceOptions(parent=self, provider=provider),
+            opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )

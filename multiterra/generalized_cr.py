@@ -58,7 +58,6 @@ class Deployment(pulumi.ComponentResource):
 
     def get_deployment_provider(self, provider: str, region: str, zone:str) -> pulumi.ProviderResource:
         cache_key = _target_key(provider, region)
-        print(f"CACHE KEY: {cache_key}\nREGION:    {region}\n\n\n")
         if cache_key in self._providers:
             return self._providers[cache_key]
 

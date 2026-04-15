@@ -38,6 +38,7 @@ class GeneralizedSubnet(GeneralizedCR):
             self.resource_name_prefix("aws", region),
             vpc_id=vpc.id,
             cidr_block=self.cidr_block,
+            availability_zone=zone,
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
         return instance

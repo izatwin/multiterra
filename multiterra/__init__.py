@@ -1,3 +1,5 @@
+from multiterra.storage.bucket import GeneralizedBucket, GeneralizedBucketArgs
+
 from .generalized_cr import Deployment, GeneralizedCR
 from .network import (
     GeneralizedSubnet,
@@ -18,4 +20,6 @@ __all__ = [
     "GeneralizedImageArgs",
     "GeneralizedVM",
     "GeneralizedVMArgs",
+    "GeneralizedBucket",
+    "GeneralizedBucketArgs",
 ]

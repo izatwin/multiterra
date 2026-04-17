@@ -224,6 +224,7 @@ try:
         GeneralizedSubnet,
         GeneralizedVM,
         GeneralizedVPC,
+        GeneralizedFirewall,
     )
 
     MULTITERRA_AVAILABLE = True
@@ -241,6 +242,9 @@ except ImportError:
         pass
 
     class GeneralizedBucket:
+        pass
+
+    class GeneralizedFirewall:
         pass
 
 
@@ -262,9 +266,10 @@ with st.sidebar:
     )
 
     # resource type badges
-    ICONS = {"VPC": "⬡", "Subnet": "◈", "VM": "▣", "Bucket": "◉"}
-    comp_type = st.selectbox("Resource Type", ["VPC", "Subnet", "VM", "Bucket"])
+    resource_options = ["VPC", "Subnet", "VM", "Bucket", "Firewall"]
+    comp_type = st.selectbox("Resource Type", options=resource_options)
     name = st.text_input("Resource Name", "my-resource")
+   
 
     st.markdown("<hr>", unsafe_allow_html=True)
 
@@ -273,10 +278,11 @@ with st.sidebar:
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("＋  Add VPC"):
             if MULTITERRA_AVAILABLE:
-                st.session_state.objects[name] = GeneralizedVPC(
-                    name, {"cidr_block": cidr}
-                )
-            st.success(f"VPC `{name}` added")
+                st.session_state.objects[name] = {
+                    "type": "VPC",
+                    "args": {"cidr_block": cidr}
+                }
+            st.success(f"VPC `{name}` added to stack")
 
     elif comp_type == "Subnet":
         vpcs = [
@@ -289,11 +295,36 @@ with st.sidebar:
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("＋  Add Subnet"):
             if MULTITERRA_AVAILABLE and vpcs:
-                st.session_state.objects[name] = GeneralizedSubnet(
-                    name,
-                    {"vpc": st.session_state.objects[vpc_name], "cidr_block": s_cidr},
-                )
+                st.session_state.objects[name] = {
+                    "type": "Subnet",
+                    "parent_vpc_name": vpc_name, 
+                    "args": {"cidr_block": s_cidr}
+                }
             st.success(f"Subnet `{name}` added")
+    
+    elif comp_type == "Firewall":
+        vpcs = [k for k, v in st.session_state.objects.items() if isinstance(v, GeneralizedVPC)]
+        vpc_name = st.selectbox("Parent VPC", vpcs if vpcs else ["— no VPCs yet —"])
+        
+        st.write("Quick Configuration")
+        ssh_on = st.checkbox("Allow SSH (22)", value=True)
+        web_on = st.checkbox("Allow HTTP (80)", value=False)
+        
+        if st.button("＋  Add Firewall"):
+            ingress = []
+            if ssh_on: ingress.append({"port": 22, "protocol": "tcp", "cidr": "0.0.0.0/0"})
+            if web_on: ingress.append({"port": 80, "protocol": "tcp", "cidr": "0.0.0.0/0"})
+            
+            if MULTITERRA_AVAILABLE and vpcs:
+                st.session_state.objects[name] = {
+                    "type": "Firewall",
+                    "parent_vpc_name": vpc_name,
+                    "args": {
+                        "ingress": ingress, 
+                        "egress": [{"port": 0, "protocol": "-1", "cidr": "0.0.0.0/0"}]
+                    }
+                }
+            st.success(f"Firewall `{name}` added")
 
     elif comp_type == "VM":
         subnets = [
@@ -307,12 +338,17 @@ with st.sidebar:
         tier = st.select_slider(
             "Instance Tier", options=["low", "medium", "high"], value="medium"
         )
-        st.markdown("<br>", unsafe_allow_html=True)
+        fws = [k for k, v in st.session_state.objects.items() if isinstance(v, GeneralizedFirewall)]
+        fw_name = st.selectbox("Attach Firewall", ["None"] + fws)
+        
         if st.button("＋  Add VM"):
             if MULTITERRA_AVAILABLE and subnets:
-                st.session_state.objects[name] = GeneralizedVM(
-                    name, {"tier": tier, "subnet": st.session_state.objects[sub_name]}
-                )
+                st.session_state.objects[name] = {
+                    "type": "VM",
+                    "parent_subnet_name": sub_name,
+                    "parent_fw_name": fw_name if fw_name != "None" else None,
+                    "args": {"tier": tier}
+                }
             st.success(f"VM `{name}` added")
 
     elif comp_type == "Bucket":
@@ -320,9 +356,10 @@ with st.sidebar:
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("＋  Add Bucket"):
             if MULTITERRA_AVAILABLE:
-                st.session_state.objects[name] = GeneralizedBucket(
-                    name, {"public_access": public}
-                )
+                st.session_state.objects[name] = {
+                    "type": "Bucket",
+                    "args": {"public_access": public}
+                }
             st.success(f"Bucket `{name}` added")
 
     # sidebar footer
@@ -361,10 +398,11 @@ with col_stack:
     )
 
     TYPE_COLORS = {
-        "GeneralizedVPC": ("#7b8cff", "rgba(123,140,255,0.1)", "⬡"),
-        "GeneralizedSubnet": ("#63d2be", "rgba(99,210,190,0.1)", "◈"),
-        "GeneralizedVM": ("#f5a623", "rgba(245,166,35,0.1)", "▣"),
-        "GeneralizedBucket": ("#ff6b6b", "rgba(255,107,107,0.1)", "◉"),
+        "GeneralizedVPC": ("#7b8cff", "rgba(123,140,255,0.1)"),
+        "GeneralizedSubnet": ("#63d2be", "rgba(99,210,190,0.1)"),
+        "GeneralizedVM": ("#f5a623", "rgba(245,166,35,0.1)"),
+        "GeneralizedBucket": ("#ff6b6b", "rgba(255,107,107,0.1)"),
+        "GeneralizedFirewall": ("#ffcc00", "rgba(255,204,0,0.1)"),
     }
 
     if not st.session_state.objects:
@@ -459,8 +497,11 @@ with col_deploy:
     )
 
     target_cloud = st.selectbox("Target Cloud", ["aws", "gcp"], key="cloud_select")
-    default_region = "us-east-1" if target_cloud == "aws" else "us-central1"
-    target_region = st.text_input("Region", default_region, key="region_input")
+    c1, c2 = st.columns(2)
+    with c1:
+        target_region = st.text_input("Region", "us-east-1" if target_cloud == "aws" else "us-central1")
+    with c2:
+        target_zone = st.text_input("Zone", "us-east-1a" if target_cloud == "aws" else "us-central1-a")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -497,7 +538,7 @@ with col_deploy:
                     "streamlit-deploy",
                     roots=list(st.session_state.objects.values()),
                     provider=target_cloud,
-                    regions={target_region},
+                    regions={target_region: target_zone}, # Dictionary format
                 )
 
             with st.spinner("Provisioning infrastructure…"):

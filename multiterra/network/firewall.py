@@ -51,7 +51,7 @@ class GeneralizedFirewall(GeneralizedCR):
 
         for i, egress in enumerate(self.egress or []):
             aws.vpc.SecurityGroupEgressRule(
-                f"{self.resource_name_prefix('aws', region)}-egress-{egress["port"]}-{i}",
+                f"{self.resource_name_prefix('aws', region)}-egress-{egress['port']}-{i}",
                 security_group_id=instance.id,
                 cidr_ipv4=egress["cidr"] if is_ipv4(egress["cidr"]) else None,
                 cidr_ipv6=egress["cidr"] if not is_ipv4(egress["cidr"]) else None,
@@ -62,7 +62,7 @@ class GeneralizedFirewall(GeneralizedCR):
 
         for i, ingress in enumerate(self.ingress or []):
             aws.vpc.SecurityGroupIngressRule(
-                f"{self.resource_name_prefix('aws', region)}-ingress-{ingress["port"]}-{i}",
+                f"{self.resource_name_prefix('aws', region)}-ingress-{ingress['port']}-{i}",
                 security_group_id=instance.id,
                 cidr_ipv4=ingress["cidr"] if is_ipv4(ingress["cidr"]) else None,
                 cidr_ipv6=ingress["cidr"] if not is_ipv4(ingress["cidr"]) else None,

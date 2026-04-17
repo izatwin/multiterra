@@ -2,6 +2,7 @@ from typing import Optional, TypedDict, cast
 
 import pulumi
 import pulumi_aws as aws
+import pulumi_gcp as gcp
 
 from ..generalized_cr import Deployment, GeneralizedCR
 
@@ -20,11 +21,24 @@ class GeneralizedVPC(GeneralizedCR):
         super().__init__("multiterra:network:GeneralizedVPC", name, [], opts=opts)
         self.cidr_block = args["cidr_block"]
 
-    def _create_aws(self, deployment: Deployment, region: str) -> aws.ec2.Vpc:
-        provider = deployment.get_deployment_provider("aws", region)
+
+    def _create_aws(self, deployment: Deployment, region: str, zone:str) -> aws.ec2.Vpc:
+        provider = deployment.get_deployment_provider("aws", region, zone)
         instance = aws.ec2.Vpc(
             self.resource_name_prefix("aws", region),
             cidr_block=self.cidr_block,
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
+        return instance
+
+
+    def _create_gcp(self, deployment: Deployment, region: str, zone:str) -> gcp.compute.Network:
+        provider = deployment.get_deployment_provider("gcp", region, zone)
+
+        instance = gcp.compute.Network(
+            self.resource_name_prefix("gcp", region),
+            auto_create_subnetworks=False,
+            opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
+        )
+
         return instance

@@ -3,29 +3,24 @@ import pulumi_tls as tls
 from multiterra import (
     Deployment,
     GeneralizedBucket,
+    GeneralizedFirewall,
     GeneralizedImage,
     GeneralizedSubnet,
     GeneralizedVM,
     GeneralizedVPC,
-    GeneralizedFirewall
+    ImageEnum,
 )
 
 
 def main():
-    GUARD = 1
 
-    if GUARD:
-        ssh_key = tls.PrivateKey(
-            "ssh-key",
-            algorithm="RSA",
-            rsa_bits=4096,
-        )
+    ssh_key = tls.PrivateKey(
+        "ssh-key",
+        algorithm="RSA",
+        rsa_bits=4096,
+    )
+    ssh_user = "ec2-user"
 
-        ssh_user = "ec2-user"
-    else:
-        ssh_key = None
-        ssh_user = None
-    
     vpc = GeneralizedVPC(
         "vpc",
         {
@@ -42,25 +37,25 @@ def main():
     )
 
     image = GeneralizedImage(
-        "tbd",
+        "ubuntu_image",
         {
-            "image_blob": "",
+            "image_name": ImageEnum.UBUNTU,
         },
     )
 
     firewall = GeneralizedFirewall(
-    "firewall",
-    {
-        "vpc": vpc,
-        "ingress": [
-            {"port": 22,  "protocol": "tcp", "cidr": "0.0.0.0/0"},
-            {"port": 443, "protocol": "tcp", "cidr": "0.0.0.0/0"},
-        ],
-        "egress": [
-            {"port": 0, "protocol": "-1", "cidr": "0.0.0.0/0"},
-        ],
-    },
-)
+        "firewall",
+        {
+            "vpc": vpc,
+            "ingress": [
+                {"port": 22, "protocol": "tcp", "cidr": "0.0.0.0/0"},
+                {"port": 443, "protocol": "tcp", "cidr": "0.0.0.0/0"},
+            ],
+            "egress": [
+                {"port": 0, "protocol": "-1", "cidr": "0.0.0.0/0"},
+            ],
+        },
+    )
 
     low_instance = GeneralizedVM(
         "lowInstance",
@@ -107,9 +102,9 @@ def main():
         "aws_deployment",
         [low_instance, medium_instance, app_storage],
         "aws",
-        {"us-east-1":None},
+        {"us-east-1": None},
     )
-    
+
     # Deployment(
     #     "gcp_deployment",
     #     [low_instance, high_instance, app_storage],

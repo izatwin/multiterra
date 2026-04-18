@@ -22,11 +22,11 @@ class GeneralizedBucket(GeneralizedCR):
         super().__init__("multiterra:storage:GeneralizedBucket", name, [], opts=opts)
         self.public_access = args["public_access"]
 
-    def _create_aws(self, deployment: Deployment, region: str) -> aws.s3.BucketV2:
-        provider = deployment.get_deployment_provider("aws", region)
+    def _create_aws(self, deployment: Deployment, region: str, zone:str) -> aws.s3.Bucket:
+        provider = deployment.get_deployment_provider("aws", region, zone)
 
         # Create the S3 Bucket
-        bucket = aws.s3.BucketV2(
+        bucket = aws.s3.Bucket(
             self.resource_name_prefix("aws", region),
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
@@ -41,10 +41,10 @@ class GeneralizedBucket(GeneralizedCR):
         )
         return bucket
 
-    def _create_gcp(self, deployment: Deployment, region: str) -> gcp.storage.Bucket:
+    def _create_gcp(self, deployment: Deployment, region: str, zone:str) -> gcp.storage.Bucket:
         # Note: You will need to implement get_deployment_provider for "gcp"
         # in generalized_cr.py first!
-        provider = deployment.get_deployment_provider("gcp", region)
+        provider = deployment.get_deployment_provider("gcp", region, zone)
 
         return gcp.storage.Bucket(
             self.resource_name_prefix("gcp", region),

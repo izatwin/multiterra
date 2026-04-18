@@ -1,3 +1,5 @@
+import pulumi_tls as tls
+
 from multiterra import (
     Deployment,
     GeneralizedBucket,
@@ -10,6 +12,20 @@ from multiterra import (
 
 
 def main():
+    GUARD = 1
+
+    if GUARD:
+        ssh_key = tls.PrivateKey(
+            "ssh-key",
+            algorithm="RSA",
+            rsa_bits=4096,
+        )
+
+        ssh_user = "ec2-user"
+    else:
+        ssh_key = None
+        ssh_user = None
+    
     vpc = GeneralizedVPC(
         "vpc",
         {
@@ -54,15 +70,30 @@ def main():
             "image": image,
             "firewall": firewall,
         },
+        ssh_key=ssh_key,
+        ssh_user=ssh_user,
     )
 
-    low_instance_two = GeneralizedVM(
-        "lowInstanceTwo",
+    medium_instance = GeneralizedVM(
+        "mediumInstance",
         {
-            "tier": "low",
+            "tier": "medium",
             "subnet": subnet,
             "image": image,
         },
+        ssh_key=ssh_key,
+        ssh_user=ssh_user,
+    )
+
+    high_instance = GeneralizedVM(
+        "highInstance",
+        {
+            "tier": "high",
+            "subnet": subnet,
+            "image": image,
+        },
+        ssh_key=ssh_key,
+        ssh_user=ssh_user,
     )
 
     app_storage = GeneralizedBucket(
@@ -74,17 +105,18 @@ def main():
 
     Deployment(
         "aws_deployment",
-        [low_instance, low_instance_two, app_storage],
+        [low_instance, medium_instance, app_storage],
         "aws",
         {"us-east-1":None},
     )
     
-    Deployment(
-        "gcp_deployment",
-        [low_instance, high_instance, app_storage],
-        "gcp",
-        {"us-central1":"us-central1-a"},
-    )
+    # Deployment(
+    #     "gcp_deployment",
+    #     [low_instance, high_instance, app_storage],
+    #     "gcp",
+    #     {"us-central1":"us-central1-a"},
+    #     project_name="pulumi-test123",
+    # )
 
 
 if __name__ == "__main__":

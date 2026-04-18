@@ -45,7 +45,6 @@ class GeneralizedFirewall(GeneralizedCR):
             self.resource_name_prefix("aws", region),
             name=self.resource_name_prefix("aws", region),
             vpc_id=vpc.id,
-            availability_zone=zone,
             opts=pulumi.ResourceOptions(parent=self, provider=provider),
         )
 

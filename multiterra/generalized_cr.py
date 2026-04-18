@@ -32,12 +32,14 @@ class Deployment(pulumi.ComponentResource):
         roots: List["GeneralizedCR"],
         provider: str,
         regions: Dict[str, str],
+        project_name=None,
         opts: Optional[pulumi.ResourceOptions] = None,
     ):
         super().__init__("multiterra:common:Deployment", name, opts=opts)
         self._component_states: Dict[GeneralizedCR, _ComponentDeploymentState] = {}
         self._providers: Dict[str, pulumi.ProviderResource] = {}
         self._roots = [root for root in roots if root is not None]
+        self._project_name = project_name
 
         for root in self._roots:
             root.deploy(self, provider, regions)
@@ -79,7 +81,7 @@ class Deployment(pulumi.ComponentResource):
         if provider == "gcp":
             gcp_provider = gcp.Provider(
                 cache_key,
-                project=f"pulumi-test123",
+                project=self._project_name,
                 region=region,
                 zone=zone,
                 opts=pulumi.ResourceOptions(parent=self),

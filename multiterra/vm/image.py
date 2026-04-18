@@ -15,6 +15,7 @@ class ImageEnum(Enum):
 
 class GeneralizedImageArgs(TypedDict):
     image_name: ImageEnum
+    user_data: Optional[str | pulumi.Output[str]]
 
 
 class GeneralizedImage(GeneralizedCR):
@@ -26,6 +27,7 @@ class GeneralizedImage(GeneralizedCR):
     ) -> None:
         super().__init__("multiterra:vm:GeneralizedImage", name, [], opts=opts)
         self.image_name = args["image_name"]
+        self.user_data = args.get("user_data")
 
     def _create_aws(
         self, deployment: Deployment, region: str, zone: str

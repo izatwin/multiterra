@@ -1,3 +1,4 @@
+import pulumi_cloudinit as cloudinit
 import pulumi_tls as tls
 
 from multiterra import (
@@ -13,13 +14,37 @@ from multiterra import (
 
 
 def main():
+    cloudinit_config = cloudinit.get_config_output(
+        gzip=False,
+        base64_encode=False,
+        parts=[
+            {
+                "content_type": "text/cloud-config",
+                "content": """#cloud-config
+package_update: true
+packages:
+    - nginx
+
+write_files:
+    - path: /usr/share/nginx/html/index.html
+    owner: root:root
+    permissions: "0644"
+    content: "<h1>cloud init was here</h1>"
+
+runcmd:
+    - systemctl enable nginx
+    - systemctl restart nginx
+    """,
+            }
+        ],
+    )
 
     ssh_key = tls.PrivateKey(
         "ssh-key",
         algorithm="RSA",
         rsa_bits=4096,
     )
-    ssh_user = "ec2-user"
+    ssh_user = "ubuntu"
 
     vpc = GeneralizedVPC(
         "vpc",
@@ -38,9 +63,7 @@ def main():
 
     image = GeneralizedImage(
         "ubuntu_image",
-        {
-            "image_name": ImageEnum.UBUNTU,
-        },
+        {"image_name": ImageEnum.UBUNTU, "user_data": cloudinit_config.rendered},
     )
 
     firewall = GeneralizedFirewall(

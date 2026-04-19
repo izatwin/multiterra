@@ -1,31 +1,39 @@
+import pulumi
+import pulumi_cloudinit as cloudinit
 import pulumi_tls as tls
 
 from multiterra import (
     Deployment,
     GeneralizedBucket,
+    GeneralizedFirewall,
     GeneralizedImage,
     GeneralizedSubnet,
     GeneralizedVM,
     GeneralizedVPC,
-    GeneralizedFirewall
+    ImageEnum,
 )
 
 
 def main():
-    GUARD = 1
-
-    if GUARD:
-        ssh_key = tls.PrivateKey(
-            "ssh-key",
-            algorithm="RSA",
-            rsa_bits=4096,
+    with open("./cloudinit.yaml", "r") as config:
+        cloudinit_config = cloudinit.get_config_output(
+            gzip=False,
+            base64_encode=False,
+            parts=[
+                {
+                    "content_type": "text/cloud-config",
+                    "content": config.read(),
+                }
+            ],
         )
 
-        ssh_user = "ec2-user"
-    else:
-        ssh_key = None
-        ssh_user = None
-    
+    ssh_key = tls.PrivateKey(
+        "ssh-key",
+        algorithm="RSA",
+        rsa_bits=4096,
+    )
+    ssh_user = "ubuntu"
+
     vpc = GeneralizedVPC(
         "vpc",
         {
@@ -42,25 +50,24 @@ def main():
     )
 
     image = GeneralizedImage(
-        "tbd",
-        {
-            "image_blob": "",
-        },
+        "ubuntu_image",
+        {"image_name": ImageEnum.UBUNTU, "user_data": cloudinit_config.rendered},
     )
 
     firewall = GeneralizedFirewall(
-    "firewall",
-    {
-        "vpc": vpc,
-        "ingress": [
-            {"port": 22,  "protocol": "tcp", "cidr": "0.0.0.0/0"},
-            {"port": 443, "protocol": "tcp", "cidr": "0.0.0.0/0"},
-        ],
-        "egress": [
-            {"port": 0, "protocol": "-1", "cidr": "0.0.0.0/0"},
-        ],
-    },
-)
+        "firewall",
+        {
+            "vpc": vpc,
+            "ingress": [
+                {"port": 22, "protocol": "tcp", "cidr": "0.0.0.0/0"},
+                {"port": 80, "protocol": "tcp", "cidr": "0.0.0.0/0"},
+                {"port": 443, "protocol": "tcp", "cidr": "0.0.0.0/0"},
+            ],
+            "egress": [
+                {"port": 0, "protocol": "-1", "cidr": "0.0.0.0/0"},
+            ],
+        },
+    )
 
     low_instance = GeneralizedVM(
         "lowInstance",
@@ -69,6 +76,7 @@ def main():
             "subnet": subnet,
             "image": image,
             "firewall": firewall,
+            "associate_public_ip": True,
         },
         ssh_key=ssh_key,
         ssh_user=ssh_user,
@@ -107,9 +115,9 @@ def main():
         "aws_deployment",
         [low_instance, medium_instance, app_storage],
         "aws",
-        {"us-east-1":None},
+        {"us-east-1": None},
     )
-    
+
     # Deployment(
     #     "gcp_deployment",
     #     [low_instance, high_instance, app_storage],
@@ -117,6 +125,8 @@ def main():
     #     {"us-central1":"us-central1-a"},
     #     project_name="pulumi-test123",
     # )
+
+    pulumi.export("private_key", pulumi.Output.secret(ssh_key.private_key_pem))
 
 
 if __name__ == "__main__":

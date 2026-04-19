@@ -5,3 +5,4 @@ venv/
 .envrc
 Pulumi.dev.yaml
 examples/basic/Pulumi.main-stack.yaml
+secret_key

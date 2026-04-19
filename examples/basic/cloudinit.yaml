@@ -1,0 +1,14 @@
+#cloud-config
+package_update: true
+packages:
+  - nginx
+
+write_files:
+  - path: /usr/share/nginx/html/index.html
+    owner: root:root
+    permissions: "0644"
+    content: "<h1>cloud init was here</h1>"
+
+runcmd:
+  - systemctl enable nginx
+  - systemctl restart nginx

@@ -42,7 +42,7 @@ class GeneralizedFirewall(GeneralizedCR):
         self.egress = args["egress"]
 
     def _create_aws(
-        self, deployment: Deployment, region: str, zone: str
+        self, deployment: Deployment, region: str, zone: str,
     ) -> aws.ec2.SecurityGroup:
         provider = deployment.get_deployment_provider("aws", region, self)
         vpc = self.vpc.get_instance(deployment, "aws", region)
@@ -53,9 +53,9 @@ class GeneralizedFirewall(GeneralizedCR):
             opts=pulumi.ResourceOptions(parent=self, provider=provider),
         )
 
-        for i, egress in enumerate(self.egress or []):
+        for egress in self.egress or []:
             aws.vpc.SecurityGroupEgressRule(
-                f"{self.resource_name_prefix('aws', region)}-egress-{egress['port']}-{i}",
+                f"{self.resource_name_prefix('aws', region)}-egress-{egress['port']}-{egress['protocol']}",
                 security_group_id=instance.id,
                 cidr_ipv4=egress["cidr"] if is_ipv4(egress["cidr"]) else None,
                 cidr_ipv6=egress["cidr"] if not is_ipv4(egress["cidr"]) else None,
@@ -65,7 +65,7 @@ class GeneralizedFirewall(GeneralizedCR):
                 opts=pulumi.ResourceOptions(parent=instance, provider=provider),
             )
 
-        for i, ingress in enumerate(self.ingress or []):
+        for ingress in self.ingress or []:
             aws.vpc.SecurityGroupIngressRule(
                 f"{self.resource_name_prefix('aws', region)}-ingress-{ingress['port']}-{ingress['protocol']}",
                 security_group_id=instance.id,

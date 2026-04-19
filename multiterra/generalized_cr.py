@@ -37,6 +37,7 @@ class Deployment(pulumi.ComponentResource):
     ):
         super().__init__("multiterra:common:Deployment", name, opts=opts)
         self._component_states: Dict[GeneralizedCR, _ComponentDeploymentState] = {}
+        self._component_extras: Dict[GeneralizedCR, _ComponentDeploymentState] = {}
         self._region_providers: Dict[str, pulumi.ProviderResource] = {}
         self._roots = [root for root in roots if root is not None]
         self._project_name = project_name
@@ -63,6 +64,14 @@ class Deployment(pulumi.ComponentResource):
         self, component: "GeneralizedCR", provider: str, region: str, instance: Any
     ):
         self._get_component_state(component).set_instance(provider, region, instance)
+
+    def get_extra(self, component: GeneralizedCR, key: str, provider: str, region: str) -> Any:
+        return self._component_extras[component][f"{key}-{_target_key(provider, region)}"]
+
+    def set_extra(self, component: GeneralizedCR, key: str, provider: str, region: str, value: Any) -> None:
+        if component not in self._component_extras:
+            self._component_extras[component] = {}
+        self._component_extras[component][f"{key}-{_target_key(provider, region)}"] = value
 
     def get_deployment_provider(
         self, provider: str, region: str, zone: str
@@ -103,6 +112,7 @@ class Deployment(pulumi.ComponentResource):
         raise ValueError(f"Unsupported provider: {provider}")
 
 
+
 class GeneralizedCR(pulumi.ComponentResource):
     def __init__(
         self,
@@ -133,3 +143,9 @@ class GeneralizedCR(pulumi.ComponentResource):
 
     def resource_name_prefix(self, provider: str, region: str) -> str:
         return f"{provider}-{region}-{type(self).__name__}-{self.name}"
+
+    def get_extra(self, deployment: Deployment, key: str, provider: str, region: str) -> Any:
+        return deployment.get_extra(self, key, provider, region)
+
+    def set_extra(self, deployment: Deployment, key: str, provider: str, region: str, value: Any) -> None:
+        deployment.set_extra(self, key, provider, region, value)

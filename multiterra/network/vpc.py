@@ -37,7 +37,7 @@ class GeneralizedVPC(GeneralizedCR):
             opts=pulumi.ResourceOptions(parent=instance, provider=provider),
         )
 
-        self.route_table = aws.ec2.RouteTable(
+        route_table = aws.ec2.RouteTable(
             f"{self.resource_name_prefix('aws', region)}-RouteTable",
             vpc_id=instance.id,
             routes=[
@@ -48,6 +48,8 @@ class GeneralizedVPC(GeneralizedCR):
             ],
             opts=pulumi.ResourceOptions(parent=instance, provider=provider),
         )
+
+        self.set_extra(deployment, "route_table", "aws", region, route_table)
 
 
         return instance

@@ -43,10 +43,12 @@ class GeneralizedSubnet(GeneralizedCR):
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
 
+        vpc_route_table = self.vpc.get_extra(deployment, "route_table", "aws", region)
+
         route_table_association = aws.ec2.RouteTableAssociation(
             f"{self.resource_name_prefix('aws', region)}-RTAssociation",
             subnet_id=instance.id,
-            route_table_id=vpc.route_table.id,
+            route_table_id=vpc_route_table.id,
             opts=pulumi.ResourceOptions(parent=instance, provider=provider),
         )
 

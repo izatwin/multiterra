@@ -14,30 +14,17 @@ from multiterra import (
 
 
 def main():
-    cloudinit_config = cloudinit.get_config_output(
-        gzip=False,
-        base64_encode=False,
-        parts=[
-            {
-                "content_type": "text/cloud-config",
-                "content": """#cloud-config
-package_update: true
-packages:
-    - nginx
-
-write_files:
-    - path: /usr/share/nginx/html/index.html
-    owner: root:root
-    permissions: "0644"
-    content: "<h1>cloud init was here</h1>"
-
-runcmd:
-    - systemctl enable nginx
-    - systemctl restart nginx
-    """,
-            }
-        ],
-    )
+    with open("./cloudinit.yaml", "r") as config:
+        cloudinit_config = cloudinit.get_config_output(
+            gzip=False,
+            base64_encode=False,
+            parts=[
+                {
+                    "content_type": "text/cloud-config",
+                    "content": config.read(),
+                }
+            ],
+        )
 
     ssh_key = tls.PrivateKey(
         "ssh-key",

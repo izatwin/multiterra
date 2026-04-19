@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Optional, TypedDict
+from typing import NotRequired, Optional, TypedDict
 
 import pulumi
 import pulumi_aws as aws
@@ -15,7 +15,7 @@ class ImageEnum(Enum):
 
 class GeneralizedImageArgs(TypedDict):
     image_name: ImageEnum
-    user_data: Optional[str | pulumi.Output[str]]
+    user_data: NotRequired[str | pulumi.Output[str]]
 
 
 class GeneralizedImage(GeneralizedCR):

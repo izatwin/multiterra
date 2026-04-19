@@ -1,3 +1,4 @@
+import pulumi
 import pulumi_cloudinit as cloudinit
 import pulumi_tls as tls
 
@@ -59,6 +60,7 @@ def main():
             "vpc": vpc,
             "ingress": [
                 {"port": 22, "protocol": "tcp", "cidr": "0.0.0.0/0"},
+                {"port": 80, "protocol": "tcp", "cidr": "0.0.0.0/0"},
                 {"port": 443, "protocol": "tcp", "cidr": "0.0.0.0/0"},
             ],
             "egress": [
@@ -74,6 +76,7 @@ def main():
             "subnet": subnet,
             "image": image,
             "firewall": firewall,
+            "associate_public_ip": True,
         },
         ssh_key=ssh_key,
         ssh_user=ssh_user,
@@ -122,6 +125,8 @@ def main():
     #     {"us-central1":"us-central1-a"},
     #     project_name="pulumi-test123",
     # )
+
+    pulumi.export("private_key", pulumi.Output.secret(ssh_key.private_key_pem))
 
 
 if __name__ == "__main__":

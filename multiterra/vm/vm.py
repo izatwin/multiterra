@@ -44,6 +44,7 @@ class GeneralizedVMArgs(TypedDict):
     subnet: GeneralizedSubnet
     image: GeneralizedImage
     firewall: NotRequired[GeneralizedFirewall]
+    associate_public_ip: NotRequired[bool]
 
 
 class GeneralizedVM(GeneralizedCR):
@@ -72,6 +73,7 @@ class GeneralizedVM(GeneralizedCR):
         self.ssh_key = ssh_key
         self.ssh_user = ssh_user
         self.aws_key_pair = None
+        self.associate_public_ip = args.get("associate_public_ip", False)
 
     def _create_aws(self, deployment: Deployment, region: str, zone: str):
         name = self.resource_name_prefix("aws", region)
@@ -103,6 +105,7 @@ class GeneralizedVM(GeneralizedCR):
             subnet_id=subnet.id,
             vpc_security_group_ids=[firewall.id] if firewall is not None else None,
             user_data=self.user_data if self.user_data is not None else None,
+            associate_public_ip_address=self.associate_public_ip,
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
 

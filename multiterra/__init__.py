@@ -2,14 +2,20 @@ from multiterra.storage.bucket import GeneralizedBucket, GeneralizedBucketArgs
 
 from .generalized_cr import Deployment, GeneralizedCR
 from .network import (
+    GeneralizedFirewall,
+    GeneralizedFirewallArgs,
     GeneralizedSubnet,
     GeneralizedSubnetArgs,
     GeneralizedVPC,
     GeneralizedVPCArgs,
-    GeneralizedFirewall,
-    GeneralizedFirewallArgs,
 )
-from .vm import GeneralizedImage, GeneralizedImageArgs, GeneralizedVM, GeneralizedVMArgs
+from .vm import (
+    GeneralizedImage,
+    GeneralizedImageArgs,
+    GeneralizedVM,
+    GeneralizedVMArgs,
+    ImageEnum,
+)
 
 __all__ = [
     "Deployment",
@@ -26,4 +32,5 @@ __all__ = [
     "GeneralizedFirewallArgs",
     "GeneralizedBucket",
     "GeneralizedBucketArgs",
+    "ImageEnum",
 ]

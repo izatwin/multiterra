@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Sequence, Set
+from typing import Any, Dict, List, Optional, Sequence
 
 import pulumi
 import pulumi_aws as aws
@@ -32,12 +32,14 @@ class Deployment(pulumi.ComponentResource):
         roots: List["GeneralizedCR"],
         provider: str,
         regions: Dict[str, str],
+        project_name=None,
         opts: Optional[pulumi.ResourceOptions] = None,
     ):
         super().__init__("multiterra:common:Deployment", name, opts=opts)
         self._component_states: Dict[GeneralizedCR, _ComponentDeploymentState] = {}
-        self._providers: Dict[str, pulumi.ProviderResource] = {}
+        self._region_providers: Dict[str, pulumi.ProviderResource] = {}
         self._roots = [root for root in roots if root is not None]
+        self._project_name = project_name
 
         for root in self._roots:
             root.deploy(self, provider, regions)
@@ -62,10 +64,12 @@ class Deployment(pulumi.ComponentResource):
     ):
         self._get_component_state(component).set_instance(provider, region, instance)
 
-    def get_deployment_provider(self, provider: str, region: str, zone:str) -> pulumi.ProviderResource:
+    def get_deployment_provider(
+        self, provider: str, region: str, zone: str
+    ) -> pulumi.ProviderResource:
         cache_key = _target_key(provider, region)
-        if cache_key in self._providers:
-            return self._providers[cache_key]
+        if cache_key in self._region_providers:
+            return self._region_providers[cache_key]
 
         if provider == "aws":
             aws_provider = aws.Provider(
@@ -73,18 +77,18 @@ class Deployment(pulumi.ComponentResource):
                 region=region,
                 opts=pulumi.ResourceOptions(parent=self),
             )
-            self._providers[cache_key] = aws_provider
+            self._region_providers[cache_key] = aws_provider
             return aws_provider
-        
+
         if provider == "gcp":
             gcp_provider = gcp.Provider(
                 cache_key,
-                project=f"pulumi-test123",
+                project=self._project_name,
                 region=region,
                 zone=zone,
                 opts=pulumi.ResourceOptions(parent=self),
             )
-            self._providers[cache_key] = gcp_provider
+            self._region_providers[cache_key] = gcp_provider
             return gcp_provider
 
         if provider == "gcp":
@@ -93,7 +97,7 @@ class Deployment(pulumi.ComponentResource):
                 region=region,
                 opts=pulumi.ResourceOptions(parent=self),
             )
-            self._providers[cache_key] = gcp_provider
+            self._region_providers[cache_key] = gcp_provider
             return gcp_provider
 
         raise ValueError(f"Unsupported provider: {provider}")
@@ -123,7 +127,9 @@ class GeneralizedCR(pulumi.ComponentResource):
             raise ValueError(f"Provider {provider} not implemented on {type(self)}")
         for region, zone in regions.items():
             if not deployment.has_instance(self, provider, region):
-                deployment.set_instance(self, provider, region, create_func(deployment, region, zone))
+                deployment.set_instance(
+                    self, provider, region, create_func(deployment, region, zone)
+                )
 
     def resource_name_prefix(self, provider: str, region: str) -> str:
         return f"{provider}-{region}-{type(self).__name__}-{self.name}"

@@ -94,14 +94,20 @@ source = { editable = "." }
 dependencies = [
     { name = "pulumi" },
     { name = "pulumi-aws" },
+    { name = "pulumi-cloudinit" },
+    { name = "pulumi-command" },
     { name = "pulumi-gcp" },
+    { name = "pulumi-tls" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "pulumi", specifier = ">=3.228.0" },
     { name = "pulumi-aws", specifier = ">=7.23.0" },
+    { name = "pulumi-cloudinit", specifier = ">=1.4.16" },
+    { name = "pulumi-command", specifier = ">=1.2.1" },
     { name = "pulumi-gcp", specifier = ">=9.19.0" },
+    { name = "pulumi-tls", specifier = ">=5.3.1" },
 ]
 
 [[package]]
@@ -289,6 +295,34 @@ wheels = [
 ]
 
 [[package]]
+name = "pulumi-cloudinit"
+version = "1.4.16"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "parver" },
+    { name = "pulumi" },
+    { name = "semver" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/39/71/7208d197b92c93fdb2eb060dced27150ff570689b964e38a8343ab6d5e80/pulumi_cloudinit-1.4.16.tar.gz", hash = "sha256:8420364c436e657230f733c1f91b791526d766d1811c1effff002da7bb861b1f", size = 11655, upload-time = "2026-02-26T11:13:47.218Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/02/e7/2cfe62328c664b0395c2856aa6cdb3189b33c2668837c7915611872a7d6a/pulumi_cloudinit-1.4.16-py3-none-any.whl", hash = "sha256:43a64126b44e1e3184c2f50f95179da35956cc41b2104d5e4639d160a38700bf", size = 15610, upload-time = "2026-02-26T11:13:44.186Z" },
+]
+
+[[package]]
+name = "pulumi-command"
+version = "1.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "parver" },
+    { name = "pulumi" },
+    { name = "semver" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cf/56/b7f66c9d2e4536b24a5bbe4e743093c7cdd689343d86f020419f4897a88d/pulumi_command-1.2.1.tar.gz", hash = "sha256:cbc9281a6571701ac5db598dac0246a058875b62f28c40c7cc0fcdc36898918d", size = 33022, upload-time = "2026-03-04T00:23:25.84Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fa/ce/1e5f30f868ba0827ca3311b0b171b12606e30c05e864714764d8d943fef1/pulumi_command-1.2.1-py3-none-any.whl", hash = "sha256:c7e465338e4363f114ddff99ee249260c7770ef4451b970ab51f7e8a37c9b030", size = 36861, upload-time = "2026-03-04T00:23:24.571Z" },
+]
+
+[[package]]
 name = "pulumi-gcp"
 version = "9.19.0"
 source = { registry = "https://pypi.org/simple" }
@@ -300,6 +334,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/97/28/be4fab274daaa49a0eb12e22b972227c9931830c25234d876c7d209af852/pulumi_gcp-9.19.0.tar.gz", hash = "sha256:42b42b1fa3c140e7900992199029e2a0dc3deb49e77e32a1812ca7b18022c4e6", size = 9906891, upload-time = "2026-04-11T01:25:31.902Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0c/ee/0cd68803579b7bbc0117dbc1ee73318105540366598db4a4568de853a7bb/pulumi_gcp-9.19.0-py3-none-any.whl", hash = "sha256:71510e22f7a6c5b6f63233a7690552298770ca02cfa3c321c8351656ba4f4ba2", size = 12166045, upload-time = "2026-04-11T01:25:28.791Z" },
+]
+
+[[package]]
+name = "pulumi-tls"
+version = "5.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "parver" },
+    { name = "pulumi" },
+    { name = "semver" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ec/15/302381b09041474a9a400a9c862d38e92ec0c409b0c954b27f86b214d265/pulumi_tls-5.3.1.tar.gz", hash = "sha256:423baaff12eb54450b1ed5909f2267d5b6e1cd734bede21fccdbc7d0a2027400", size = 30493, upload-time = "2026-03-30T17:41:35.554Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/be/c5/c8cf063f9c5eded07f2e9d56d8083908e4a7ac6217abc4feeb5646b526f3/pulumi_tls-5.3.1-py3-none-any.whl", hash = "sha256:e9e374b0d553d264b0c8ae00bd4dadd15a74f15fc26979b312f95f8bbbcc1b59", size = 38716, upload-time = "2026-03-30T17:41:34.374Z" },
 ]
 
 [[package]]

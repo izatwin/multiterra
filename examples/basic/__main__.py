@@ -118,13 +118,13 @@ def main():
         {"us-east-1": None},
     )
 
-    # Deployment(
-    #     "gcp_deployment",
-    #     [low_instance, high_instance, app_storage],
-    #     "gcp",
-    #     {"us-central1":"us-central1-a"},
-    #     project_name="pulumi-test123",
-    # )
+    Deployment(
+        "gcp_deployment",
+        [low_instance, high_instance, app_storage],
+        "gcp",
+        {"us-central1":"us-central1-a"},
+        project_name="pulumi-test123",
+    )
 
     pulumi.export("private_key", pulumi.Output.secret(ssh_key.private_key_pem))
 

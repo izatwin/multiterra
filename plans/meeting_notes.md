@@ -76,3 +76,12 @@ Next time:
 
 
 
+## April 16th
+
+- tasks to do
+  - 
+  - Make the shell script
+    - installs apache, adds html file for simple ass web server, make sure it's running
+  - Add a shell script init as part of VM component
+  - add firewall to gcp along with opening port 22 if doing shell script (Sean)
+  - finish the UI? (Rushali)

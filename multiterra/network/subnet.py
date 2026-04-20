@@ -30,8 +30,9 @@ class GeneralizedSubnet(GeneralizedCR):
         self.vpc = args["vpc"]
         self.cidr_block = args["cidr_block"]
 
-
-    def _create_aws(self, deployment: Deployment, region: str, zone:str) -> aws.ec2.Subnet:
+    def _create_aws(
+        self, deployment: Deployment, region: str, zone: str
+    ) -> aws.ec2.Subnet:
         provider = deployment.get_deployment_provider("aws", region, zone)
         vpc = self.vpc.get_instance(deployment, "aws", region)
         instance = aws.ec2.Subnet(
@@ -41,6 +42,16 @@ class GeneralizedSubnet(GeneralizedCR):
             availability_zone=zone,
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
+
+        vpc_route_table = self.vpc.get_extra(deployment, "route_table", "aws", region)
+
+        route_table_association = aws.ec2.RouteTableAssociation(
+            f"{self.resource_name_prefix('aws', region)}-RTAssociation",
+            subnet_id=instance.id,
+            route_table_id=vpc_route_table.id,
+            opts=pulumi.ResourceOptions(parent=instance, provider=provider),
+        )
+
         return instance
 
 

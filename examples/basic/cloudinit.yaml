@@ -1,14 +1,15 @@
 #cloud-config
 package_update: true
 packages:
-  - nginx
+  - apache2
 
 write_files:
-  - path: /usr/share/nginx/html/index.html
+  - path: /var/www/html/index.html
     owner: root:root
     permissions: "0644"
-    content: "<h1>cloud init was here</h1>"
+    defer: true
+    content: "<h1>Multiterra</h1>"
 
 runcmd:
-  - systemctl enable nginx
-  - systemctl restart nginx
+  - systemctl enable apache2
+  - systemctl restart apache2

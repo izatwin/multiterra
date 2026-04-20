@@ -111,23 +111,25 @@ def main():
         },
     )
 
-    Deployment(
-        "aws_deployment",
-        [low_instance, medium_instance, app_storage],
-        "aws",
-        {"us-east-1": None},
-    )
-
     # Deployment(
-    #     "gcp_deployment",
-    #     [low_instance, high_instance, app_storage],
-    #     "gcp",
-    #     {"us-central1":"us-central1-a"},
-    #     project_name="pulumi-test123",
+    #     "aws_deployment",
+    #     [low_instance, medium_instance, app_storage],
+    #     "aws",
+    #     {"us-east-1": None},
     # )
+
+    Deployment(
+        "gcp_deployment",
+        # [low_instance, high_instance, app_storage],
+        [low_instance],
+        "gcp",
+        {"us-central1":"us-central1-a"},
+        project_name="pulumi-test123",
+    )
 
     pulumi.export("private_key", pulumi.Output.secret(ssh_key.private_key_pem))
 
 
 if __name__ == "__main__":
-    main()
+    pass
+    # main()

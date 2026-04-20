@@ -63,4 +63,18 @@ class GeneralizedVPC(GeneralizedCR):
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
 
+        # 2. Default internet route (like AWS IGW route)
+        default_route = gcp.compute.Route(
+            f"{self.resource_name_prefix("gcp", region)}-default-internet-route",
+            name=f"{self.resource_name_prefix("gcp", region)}-default-internet-route".lower().replace("_", "-"),
+            network=instance.id,
+            dest_range="0.0.0.0/0",
+            next_hop_gateway="default-internet-gateway",
+            priority=1000,
+            opts=pulumi.ResourceOptions(parent=instance, provider=provider),
+        )
+
+        # 3. Store route (equivalent to AWS set_extra route_table)
+        self.set_extra(deployment, "route", "gcp", region, default_route)
+
         return instance

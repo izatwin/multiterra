@@ -4,6 +4,7 @@ from typing import Optional, TypedDict
 
 import pulumi
 import pulumi_aws as aws
+import pulumi_gcp as gcp
 
 from multiterra.generalized_cr import Deployment, GeneralizedCR
 
@@ -46,11 +47,12 @@ class GeneralizedFirewall(GeneralizedCR):
     ) -> aws.ec2.SecurityGroup:
         provider = deployment.get_deployment_provider("aws", region, self)
         vpc = self.vpc.get_instance(deployment, "aws", region)
+
         instance = aws.ec2.SecurityGroup(
             self.resource_name_prefix("aws", region),
             name=self.resource_name_prefix("aws", region),
             vpc_id=vpc.id,
-            opts=pulumi.ResourceOptions(parent=self, provider=provider),
+            opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
 
         for egress in self.egress or []:
@@ -78,3 +80,44 @@ class GeneralizedFirewall(GeneralizedCR):
             )
 
         return instance
+
+
+    def _create_gcp(self, deployment, region: str, zone: str):
+        provider = deployment.get_deployment_provider("gcp", region, self)
+        network = self.vpc.get_instance(deployment, "gcp", region)
+
+        for ingress in self.ingress or []:
+            allows=[gcp.compute.FirewallAllowArgs(
+                protocol=ingress["protocol"],
+                ports=[str(ingress["port"])] if ingress["protocol"] != "-1" else None,
+            )] if ingress["protocol"] != "-1" else [
+                gcp.compute.FirewallAllowArgs(protocol="all")
+            ]
+            
+            gcp.compute.Firewall(
+                f"{self.resource_name_prefix('gcp', region)}-ingress-{ingress['port']}-{ingress['protocol']}".lower().replace("_", "-"),
+                name=f"{self.resource_name_prefix("gcp", region)}-ingress-{ingress['port']}-{ingress['protocol']}".lower().replace("_", "-"),
+                network=network.id,
+                direction="INGRESS",
+                allows=allows,
+                source_ranges=[ingress["cidr"]],
+                opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
+            )
+
+        for egress in self.egress or []:
+            allows=[gcp.compute.FirewallAllowArgs(
+                protocol=egress["protocol"],
+                ports=[str(egress["port"])] if egress["protocol"] != "-1" else None,
+            )] if egress["protocol"] != "-1" else [
+                gcp.compute.FirewallAllowArgs(protocol="all")
+            ]
+            
+            gcp.compute.Firewall(
+                f"{self.resource_name_prefix('gcp', region)}-egress-{egress['port']}-{egress['protocol']}".lower().replace("_", "-"),
+                name=f"{self.resource_name_prefix("gcp", region)}-egress-{egress['port']}-{egress['protocol']}".lower().replace("_", "-"),
+                network=network.id,
+                direction="EGRESS",
+                allows=allows,
+                destination_ranges=[egress["cidr"]],
+                opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
+            )

@@ -152,6 +152,15 @@ class GeneralizedVM(GeneralizedCR):
         # if self.ssh_key is not None:
         # self.run_command(instance)
 
+        instance_ip = instance.network_interfaces.apply(
+            lambda interfaces: (
+                interfaces[0].access_configs and interfaces[0].access_configs[0].nat_ip
+            ),
+        )
+        pulumi.export(f"{self.name}-name", instance.name)
+        pulumi.export(f"{self.name}-ip", instance_ip)
+
+
         return instance
 
     def run_command(self, instance):

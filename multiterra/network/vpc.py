@@ -24,21 +24,22 @@ class GeneralizedVPC(GeneralizedCR):
     def _create_aws(
         self, deployment: Deployment, region: str, zone: str
     ) -> aws.ec2.Vpc:
+        name = self.resource_name_prefix("aws", region, zone).lower().replace("_", "-")
         provider = deployment.get_deployment_provider("aws", region, zone)
         instance = aws.ec2.Vpc(
-            self.resource_name_prefix("aws", region),
+            name,
             cidr_block=self.cidr_block,
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
 
         self.gateway = aws.ec2.InternetGateway(
-            f"{self.resource_name_prefix('aws', region)}-Gateway",
+            f"{name}-gateway",
             vpc_id=instance.id,
             opts=pulumi.ResourceOptions(parent=instance, provider=provider),
         )
 
         route_table = aws.ec2.RouteTable(
-            f"{self.resource_name_prefix('aws', region)}-RouteTable",
+            f"{name}-route",
             vpc_id=instance.id,
             routes=[
                 {
@@ -49,32 +50,32 @@ class GeneralizedVPC(GeneralizedCR):
             opts=pulumi.ResourceOptions(parent=instance, provider=provider),
         )
 
-        self.set_extra(deployment, "route_table", "aws", region, route_table)
+        self.set_extra(deployment, "route_table", "aws", region, zone, route_table)
 
 
         return instance
 
     def _create_gcp(self, deployment: Deployment, region: str, zone:str) -> gcp.compute.Network:
+        name = self.resource_name_prefix("gcp", region, zone).lower().replace("_", "-")
         provider = deployment.get_deployment_provider("gcp", region, zone)
 
         instance = gcp.compute.Network(
-            self.resource_name_prefix("gcp", region),
+            name,
             auto_create_subnetworks=False,
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
 
         # 2. Default internet route (like AWS IGW route)
-        default_route = gcp.compute.Route(
-            f"{self.resource_name_prefix("gcp", region)}-default-internet-route",
-            name=f"{self.resource_name_prefix("gcp", region)}-default-internet-route".lower().replace("_", "-"),
-            network=instance.id,
-            dest_range="0.0.0.0/0",
-            next_hop_gateway="default-internet-gateway",
-            priority=1000,
-            opts=pulumi.ResourceOptions(parent=instance, provider=provider),
-        )
+        # default_route = gcp.compute.Route(
+        #     f"{name}-route",
+        #     network=instance.id,
+        #     dest_range="0.0.0.0/0",
+        #     next_hop_gateway="default-internet-gateway",
+        #     priority=1000,
+        #     opts=pulumi.ResourceOptions(parent=instance, provider=provider),
+        # )
 
-        # 3. Store route (equivalent to AWS set_extra route_table)
-        self.set_extra(deployment, "route", "gcp", region, default_route)
+        # # 3. Store route (equivalent to AWS set_extra route_table)
+        # self.set_extra(deployment, "route", "gcp", region, zone, default_route)
 
         return instance

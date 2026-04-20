@@ -15,6 +15,8 @@ from multiterra import (
 
 
 def main():
+
+    # Define non-pulumi resources
     with open("./cloudinit.yaml", "r") as config:
         cloudinit_config = cloudinit.get_config_output(
             gzip=False,
@@ -28,12 +30,13 @@ def main():
         )
 
     ssh_key = tls.PrivateKey(
-        "ssh-key",
+        "ssh_key",
         algorithm="RSA",
         rsa_bits=4096,
     )
     ssh_user = "ubuntu"
 
+    # Define generalized resources
     vpc = GeneralizedVPC(
         "vpc",
         {
@@ -51,7 +54,9 @@ def main():
 
     image = GeneralizedImage(
         "ubuntu_image",
-        {"image_name": ImageEnum.UBUNTU, "user_data": cloudinit_config.rendered},
+        {
+            "image_name": ImageEnum.UBUNTU, "user_data": cloudinit_config.rendered
+        },
     )
 
     firewall = GeneralizedFirewall(
@@ -70,60 +75,64 @@ def main():
     )
 
     low_instance = GeneralizedVM(
-        "lowInstance",
+        "low_instance",
         {
             "tier": "low",
             "subnet": subnet,
             "image": image,
             "firewall": firewall,
+            "ssh_key": ssh_key,
+            "ssh_user": ssh_user,
             "associate_public_ip": True,
         },
-        ssh_key=ssh_key,
-        ssh_user=ssh_user,
     )
 
     medium_instance = GeneralizedVM(
-        "mediumInstance",
+        "medium_instance",
         {
             "tier": "medium",
             "subnet": subnet,
             "image": image,
         },
-        ssh_key=ssh_key,
-        ssh_user=ssh_user,
     )
 
     high_instance = GeneralizedVM(
-        "highInstance",
+        "high_instance",
         {
             "tier": "high",
             "subnet": subnet,
             "image": image,
         },
-        ssh_key=ssh_key,
-        ssh_user=ssh_user,
     )
 
     app_storage = GeneralizedBucket(
-        "app-data",
+        "bucket",
         {
             "public_access": False,
         },
     )
 
     # Deployment(
+    #     "defaults",
+    #     [low_instance],
+    #     "gcp",
+    #     {},
+    #     project_name="pulumi-test123",
+    # )
+
+    # Deployment(
     #     "aws_deployment",
     #     [low_instance, medium_instance, app_storage],
-    #     "aws",
-    #     {"us-east-1": None},
+    #     "gcp",
+    #     {"us-east1": {}},
+    #     project_name="pulumi-test123",
     # )
 
     Deployment(
         "gcp_deployment",
-        # [low_instance, high_instance, app_storage],
-        [low_instance],
+        [low_instance, high_instance, app_storage],
         "gcp",
-        {"us-central1":"us-central1-a"},
+        {"us-central1":{"us-central1-a", "us-central1-b"}, "us-east1": {"us-east1-c"}},
         project_name="pulumi-test123",
     )
 
@@ -132,4 +141,4 @@ def main():
 
 if __name__ == "__main__":
     pass
-    # main()
+    main()

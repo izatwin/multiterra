@@ -6,6 +6,7 @@ import pulumi
 import pulumi_aws as aws
 import pulumi_command as command
 import pulumi_gcp as gcp
+import pulumi_tls as tls
 from pulumi import FileAsset
 
 from multiterra.network import GeneralizedFirewall, GeneralizedSubnet
@@ -45,6 +46,8 @@ class GeneralizedVMArgs(TypedDict):
     image: GeneralizedImage
     firewall: NotRequired[GeneralizedFirewall]
     associate_public_ip: NotRequired[bool]
+    ssh_key: NotRequired[tls.PrivateKey]
+    ssh_user: NotRequired[str]
 
 
 class GeneralizedVM(GeneralizedCR):
@@ -52,8 +55,6 @@ class GeneralizedVM(GeneralizedCR):
         self,
         name: str,
         args: GeneralizedVMArgs,
-        ssh_key=None,
-        ssh_user=None,
         opts: Optional[pulumi.ResourceOptions] = None,
     ) -> None:
         deps: List[GeneralizedCR] = [args["subnet"]]
@@ -70,33 +71,33 @@ class GeneralizedVM(GeneralizedCR):
         self.image = image
         self.user_data = image.user_data
         self.firewall = firewall
-        self.ssh_key = ssh_key
-        self.ssh_user = ssh_user
+        self.ssh_key = args.get("ssh_key", None)
+        self.ssh_user = args.get("ssh_user", None)
         self.aws_key_pair = None
         self.associate_public_ip = args.get("associate_public_ip", False)
 
     def _create_aws(self, deployment: Deployment, region: str, zone: str):
-        name = self.resource_name_prefix("aws", region)
+        name = self.resource_name_prefix("aws", region, zone).lower().replace("_", "-")
         config = config_aws[self.tier]
         provider = deployment.get_deployment_provider("aws", region, zone)
-        subnet = self.subnet.get_instance(deployment, "aws", region)
+        subnet = self.subnet.get_instance(deployment, "aws", region, zone)
         firewall = (
             None
             if self.firewall is None
-            else self.firewall.get_instance(deployment, "aws", region)
+            else self.firewall.get_instance(deployment, "aws", region, zone)
         )
 
-        image = self.image.get_instance(deployment, "aws", region)
+        image = self.image.get_instance(deployment, "aws", region, zone)
 
         if (self.ssh_key is not None) and (self.aws_key_pair is None):
             self.aws_key_pair = aws.ec2.KeyPair(
-                f"{self.name}-keypair",
+                f"{name}-keypair",
                 public_key=self.ssh_key.public_key_openssh,
                 opts=pulumi.ResourceOptions(parent=deployment),
             )
 
         instance = aws.ec2.Instance(
-            f"{name}-instance",
+            name,
             instance_type=config["instance_type"],
             key_name=self.aws_key_pair.key_name
             if self.aws_key_pair is not None
@@ -115,11 +116,11 @@ class GeneralizedVM(GeneralizedCR):
         return instance
 
     def _create_gcp(self, deployment: Deployment, region: str, zone: str):
-        name = self.resource_name_prefix("gcp", region).lower()
+        name = self.resource_name_prefix("gcp", region, zone).lower().replace("_", "-")
         config = config_gcp[self.tier]
         provider = deployment.get_deployment_provider("gcp", region, zone)
-        subnet = self.subnet.get_instance(deployment, "gcp", region)
-        image = self.image.get_instance(deployment, "gcp", region)
+        subnet = self.subnet.get_instance(deployment, "gcp", region, zone)
+        image = self.image.get_instance(deployment, "gcp", region, zone)
 
         metadata = dict()
         if self.ssh_key is not None:
@@ -131,7 +132,7 @@ class GeneralizedVM(GeneralizedCR):
             metadata["user-data"] = self.user_data
 
         instance = gcp.compute.Instance(
-            f"{name}-instance",
+            name,
             machine_type=config["machine_type"],
             zone=zone,
             boot_disk={

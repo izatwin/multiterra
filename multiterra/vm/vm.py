@@ -109,6 +109,8 @@ class GeneralizedVM(GeneralizedCR):
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
 
+        pulumi.export(f"{self.name}-ip", instance.public_ip)
+
         # if self.ssh_key is not None:
         # self.run_command(instance)
 

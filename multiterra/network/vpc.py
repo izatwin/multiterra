@@ -65,7 +65,7 @@ class GeneralizedVPC(GeneralizedCR):
 
         # 2. Default internet route (like AWS IGW route)
         default_route = gcp.compute.Route(
-            f"{self.resource_name_prefix("gcp", region)}-default-internet-route".lower().replace("_", "-"),
+            f"{self.resource_name_prefix("gcp", region)}-default-internet-route",
             name=f"{self.resource_name_prefix("gcp", region)}-default-internet-route".lower().replace("_", "-"),
             network=instance.id,
             dest_range="0.0.0.0/0",

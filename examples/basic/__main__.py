@@ -111,16 +111,17 @@ def main():
         },
     )
 
-    Deployment(
-        "aws_deployment",
-        [low_instance, medium_instance, app_storage],
-        "aws",
-        {"us-east-1": None},
-    )
+    # Deployment(
+    #     "aws_deployment",
+    #     [low_instance, medium_instance, app_storage],
+    #     "aws",
+    #     {"us-east-1": None},
+    # )
 
     Deployment(
         "gcp_deployment",
-        [low_instance, high_instance, app_storage],
+        # [low_instance, high_instance, app_storage],
+        [low_instance],
         "gcp",
         {"us-central1":"us-central1-a"},
         project_name="pulumi-test123",
@@ -130,4 +131,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    pass
+    # main()

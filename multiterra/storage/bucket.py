@@ -23,17 +23,18 @@ class GeneralizedBucket(GeneralizedCR):
         self.public_access = args["public_access"]
 
     def _create_aws(self, deployment: Deployment, region: str, zone:str) -> aws.s3.Bucket:
+        name = self.resource_name_prefix("aws", region, zone).lower().replace("_", "-")
         provider = deployment.get_deployment_provider("aws", region, zone)
 
         # Create the S3 Bucket
         bucket = aws.s3.Bucket(
-            self.resource_name_prefix("aws", region),
+            name,
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
 
         # Handle Public Access Block based on your generic args
         aws.s3.BucketPublicAccessBlock(
-            f"{self.name}-pab",
+            f"{name}-pab",
             bucket=bucket.id,
             block_public_acls=not self.public_access,
             block_public_policy=not self.public_access,
@@ -42,12 +43,11 @@ class GeneralizedBucket(GeneralizedCR):
         return bucket
 
     def _create_gcp(self, deployment: Deployment, region: str, zone:str) -> gcp.storage.Bucket:
-        # Note: You will need to implement get_deployment_provider for "gcp"
-        # in generalized_cr.py first!
+        name = self.resource_name_prefix("gcp", region, zone).lower().replace("_", "-")
         provider = deployment.get_deployment_provider("gcp", region, zone)
 
         return gcp.storage.Bucket(
-            self.resource_name_prefix("gcp", region),
+            name,
             location=region.upper(),
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )

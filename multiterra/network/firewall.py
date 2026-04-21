@@ -45,19 +45,19 @@ class GeneralizedFirewall(GeneralizedCR):
     def _create_aws(
         self, deployment: Deployment, region: str, zone: str,
     ) -> aws.ec2.SecurityGroup:
-        provider = deployment.get_deployment_provider("aws", region, self)
-        vpc = self.vpc.get_instance(deployment, "aws", region)
+        name = self.resource_name_prefix("aws", region, zone).lower().replace("_", "-")
+        provider = deployment.get_deployment_provider("aws", region, zone)
+        vpc = self.vpc.get_instance(deployment, "aws", region, zone)
 
         instance = aws.ec2.SecurityGroup(
-            self.resource_name_prefix("aws", region),
-            name=self.resource_name_prefix("aws", region),
+            name,
             vpc_id=vpc.id,
             opts=pulumi.ResourceOptions(parent=deployment, provider=provider),
         )
 
         for egress in self.egress or []:
             aws.vpc.SecurityGroupEgressRule(
-                f"{self.resource_name_prefix('aws', region)}-egress-{egress['port']}-{egress['protocol']}",
+                f"{name}-egress-{egress['port']}-{egress['protocol']}",
                 security_group_id=instance.id,
                 cidr_ipv4=egress["cidr"] if is_ipv4(egress["cidr"]) else None,
                 cidr_ipv6=egress["cidr"] if not is_ipv4(egress["cidr"]) else None,
@@ -69,7 +69,7 @@ class GeneralizedFirewall(GeneralizedCR):
 
         for ingress in self.ingress or []:
             aws.vpc.SecurityGroupIngressRule(
-                f"{self.resource_name_prefix('aws', region)}-ingress-{ingress['port']}-{ingress['protocol']}",
+                f"{name}-ingress-{ingress['port']}-{ingress['protocol']}",
                 security_group_id=instance.id,
                 cidr_ipv4=ingress["cidr"] if is_ipv4(ingress["cidr"]) else None,
                 cidr_ipv6=ingress["cidr"] if not is_ipv4(ingress["cidr"]) else None,
@@ -83,8 +83,9 @@ class GeneralizedFirewall(GeneralizedCR):
 
 
     def _create_gcp(self, deployment, region: str, zone: str):
-        provider = deployment.get_deployment_provider("gcp", region, self)
-        network = self.vpc.get_instance(deployment, "gcp", region)
+        name = self.resource_name_prefix("gcp", region, zone).lower().replace("_", "-")
+        provider = deployment.get_deployment_provider("gcp", region, zone)
+        network = self.vpc.get_instance(deployment, "gcp", region, zone)
 
         for ingress in self.ingress or []:
             allows=[gcp.compute.FirewallAllowArgs(
@@ -95,8 +96,7 @@ class GeneralizedFirewall(GeneralizedCR):
             ]
             
             gcp.compute.Firewall(
-                f"{self.resource_name_prefix('gcp', region)}-ingress-{ingress['port']}-{ingress['protocol']}".lower().replace("_", "-"),
-                name=f"{self.resource_name_prefix("gcp", region)}-ingress-{ingress['port']}-{ingress['protocol']}".lower().replace("_", "-"),
+                f"{name}-ingress-{ingress['port']}-{ingress['protocol']}".lower().replace("_", "-"),
                 network=network.id,
                 direction="INGRESS",
                 allows=allows,
@@ -113,8 +113,7 @@ class GeneralizedFirewall(GeneralizedCR):
             ]
             
             gcp.compute.Firewall(
-                f"{self.resource_name_prefix('gcp', region)}-egress-{egress['port']}-{egress['protocol']}".lower().replace("_", "-"),
-                name=f"{self.resource_name_prefix("gcp", region)}-egress-{egress['port']}-{egress['protocol']}".lower().replace("_", "-"),
+                f"{name}-egress-{egress['port']}-{egress['protocol']}".lower().replace("_", "-"),
                 network=network.id,
                 direction="EGRESS",
                 allows=allows,

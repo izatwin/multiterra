@@ -34,7 +34,6 @@ def main():
         algorithm="RSA",
         rsa_bits=4096,
     )
-    ssh_user = "ubuntu"
 
     # Define generalized resources
     vpc = GeneralizedVPC(
@@ -82,7 +81,6 @@ def main():
             "image": image,
             "firewall": firewall,
             "ssh_key": ssh_key,
-            "ssh_user": ssh_user,
             "associate_public_ip": True,
         },
     )
@@ -96,15 +94,6 @@ def main():
         },
     )
 
-    high_instance = GeneralizedVM(
-        "high_instance",
-        {
-            "tier": "high",
-            "subnet": subnet,
-            "image": image,
-        },
-    )
-
     app_storage = GeneralizedBucket(
         "bucket",
         {
@@ -112,27 +101,19 @@ def main():
         },
     )
 
-    # Deployment(
-    #     "defaults",
-    #     [low_instance],
-    #     "gcp",
-    #     {},
-    #     project_name="pulumi-test123",
-    # )
-
-    # Deployment(
-    #     "aws_deployment",
-    #     [low_instance, medium_instance, app_storage],
-    #     "gcp",
-    #     {"us-east1": {}},
-    #     project_name="pulumi-test123",
-    # )
+    Deployment(
+        "aws_deployment",
+        [low_instance, medium_instance, app_storage],
+        "aws",
+        {"us-east-1": {"us-east-1a"}},
+        project_name="pulumi-test123",
+    )
 
     Deployment(
         "gcp_deployment",
-        [low_instance, high_instance, app_storage],
+        [low_instance, app_storage],
         "gcp",
-        {"us-central1":{"us-central1-a", "us-central1-b"}, "us-east1": {"us-east1-c"}},
+        {"us-central1":{"us-central1-a"}},
         project_name="pulumi-test123",
     )
 
@@ -140,5 +121,4 @@ def main():
 
 
 if __name__ == "__main__":
-    pass
     main()
